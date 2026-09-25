@@ -249,6 +249,28 @@ describe('formatToolContent', () => {
   });
 
   describe('resource handling', () => {
+    it('preserves MCP UI resources for custom endpoints', () => {
+      const result: t.MCPToolCallResponse = {
+        content: [
+          {
+            type: 'resource',
+            resource: {
+              uri: 'ui://drawio/mcp-app.html',
+              mimeType: 'text/html',
+              text: '<p>Drawing</p>',
+            },
+          },
+        ],
+      };
+
+      const [content, artifacts] = formatToolContent(result, 'custom');
+      expect(content).toContain('UI Resource ID:');
+      expect(artifacts?.ui_resources?.data?.[0]).toMatchObject({
+        uri: 'ui://drawio/mcp-app.html',
+        mimeType: 'text/html',
+      });
+    });
+
     it('should handle UI resources in artifacts', () => {
       const result: t.MCPToolCallResponse = {
         content: [

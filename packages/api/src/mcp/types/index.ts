@@ -101,6 +101,7 @@ export type MCPToolCallResponse =
     };
 
 export type Provider =
+  | 'custom'
   | 'google'
   | 'anthropic'
   | 'openai'

@@ -108,25 +108,24 @@ const UIResourceCarousel: React.FC<UIResourceCarouselProps> = React.memo(({ uiRe
         className="hide-scrollbar flex gap-4 overflow-x-auto scroll-smooth"
       >
         {supportedUIResources.map((uiResource, index) => {
-          const height = 360;
-          const width = 230;
+          const isEnterpriseChart = uiResource.uri.startsWith('ui://enterprise-charts/');
 
           return (
             <div
               key={index}
               className="flex-shrink-0 transform-gpu transition-all duration-300 ease-out animate-in fade-in-0 slide-in-from-bottom-5"
               style={{
-                width: `${width}px`,
-                minHeight: `${height}px`,
+                width: isEnterpriseChart ? 'min(100%, 720px)' : '230px',
+                minHeight: isEnterpriseChart ? undefined : '360px',
                 animationDelay: `${index * 100}ms`,
               }}
             >
-              <div className="flex h-full flex-col">
+              <div className={isEnterpriseChart ? 'flex flex-col' : 'flex h-full flex-col'}>
                 <UIResourceRenderer
                   resource={uiResource}
                   onUIAction={async (result) => handleUIAction(result, ask)}
                   htmlProps={{
-                    autoResizeIframe: { width: true, height: true },
+                    autoResizeIframe: { width: !isEnterpriseChart, height: true },
                   }}
                 />
               </div>

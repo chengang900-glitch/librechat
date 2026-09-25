@@ -55,6 +55,7 @@ function assertImageDataWithinLimit(item: t.ImageContent): void {
 }
 
 const RECOGNIZED_PROVIDERS = new Set([
+  'custom',
   'google',
   'anthropic',
   'openai',

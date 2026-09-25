@@ -77,6 +77,24 @@ describe('UIResourceRenderer', () => {
     );
   });
 
+  it('allows drawing downloads only for the Draw.io MCP app', () => {
+    const resource: UIResource = {
+      resourceId: 'drawio-resource',
+      uri: 'ui://drawio/mcp-app.html',
+      mimeType: 'text/html',
+      text: '<p>Drawing</p>',
+    };
+
+    render(<UIResourceRenderer resource={resource} />);
+
+    expect(mockLegacyRenderer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        htmlProps: { sandboxPermissions: 'allow-popups allow-downloads' },
+      }),
+      expect.any(Object),
+    );
+  });
+
   it.each(['text/html; charset=utf-8', 'TEXT/HTML'])('normalizes HTML MIME type %s', (mimeType) => {
     const resource: UIResource = {
       resourceId: 'html-resource',

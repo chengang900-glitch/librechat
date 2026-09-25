@@ -35,6 +35,9 @@ export default function UIResourceRenderer({
   delete safeResource.contentType;
   safeResource.mimeType = 'text/html';
   delete safeHtmlProps.sandboxPermissions;
+  if (safeResource.uri === 'ui://drawio/mcp-app.html') {
+    safeHtmlProps.sandboxPermissions = 'allow-popups allow-downloads';
+  }
 
   return (
     <LegacyUIResourceRenderer

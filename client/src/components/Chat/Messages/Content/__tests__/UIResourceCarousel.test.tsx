@@ -293,6 +293,18 @@ describe('UIResourceCarousel', () => {
     });
   });
 
+  it('expands enterprise charts while keeping other resources at their default size', () => {
+    const chartResource = { ...mockUIResources[0], uri: 'ui://enterprise-charts/test' };
+    render(<UIResourceCarousel uiResources={[chartResource, mockUIResources[1]]} />);
+    const containers = screen
+      .getAllByTestId('ui-resource-renderer')
+      .map((el) => el.parentElement?.parentElement);
+
+    expect(containers[0]).toHaveStyle({ width: 'min(100%, 720px)' });
+    expect(containers[0]).not.toHaveStyle({ minHeight: '360px' });
+    expect(containers[1]).toHaveStyle({ width: '230px', minHeight: '360px' });
+  });
+
   it('shows correct gradient overlays based on scroll position', () => {
     const { container } = render(<UIResourceCarousel uiResources={mockUIResources} />);
 
