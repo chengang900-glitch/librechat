@@ -267,7 +267,7 @@ describe('auditLog methods', () => {
       expect((await methods.listAuditLogPage('tenant-a', { actorType: 'agent' })).total).toBe(0);
     });
 
-    it('substring-matches actorQuery, targetQuery, and capability case-insensitively', async () => {
+    it('filters exact target ids and substring-matches actorQuery, targetQuery, and capability', async () => {
       await methods.recordAuditEntry(
         baseInput({
           actor: { type: 'user', id: actorObjectId, name: 'Alice Admin' },
@@ -276,6 +276,8 @@ describe('auditLog methods', () => {
         }),
       );
       expect((await methods.listAuditLogPage('tenant-a', { actorQuery: 'alice' })).total).toBe(1);
+      expect((await methods.listAuditLogPage('tenant-a', { targetId: 'ADMIN' })).total).toBe(1);
+      expect((await methods.listAuditLogPage('tenant-a', { targetId: 'OTHER' })).total).toBe(0);
       expect((await methods.listAuditLogPage('tenant-a', { targetQuery: 'admin' })).total).toBe(1);
       expect((await methods.listAuditLogPage('tenant-a', { capability: 'manage' })).total).toBe(1);
       expect((await methods.listAuditLogPage('tenant-a', { actorQuery: 'zzz' })).total).toBe(0);

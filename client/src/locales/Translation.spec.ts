@@ -7,6 +7,7 @@ import {
   initializeI18n,
   normalizeLocale,
 } from './i18n';
+import SimplifiedChinese from './zh-Hans/translation.json';
 import English from './en/translation.json';
 import Spanish from './es/translation.json';
 import French from './fr/translation.json';
@@ -66,6 +67,47 @@ describe('i18next translation tests', () => {
 
     await changeLanguageSafely('fr');
     expect(i18n.t('com_endpoint_default_with_num', { 0: 'Marie' })).toBe('par défaut : Marie');
+  });
+
+  it('should provide simplified Chinese translations for every sidebar key', () => {
+    const sidebarKeys = [
+      'com_ui_all_projects',
+      'com_ui_change_project',
+      'com_ui_conversation_label',
+      'com_ui_delete_project',
+      'com_ui_delete_project_confirm',
+      'com_ui_link_copied',
+      'com_ui_link_refreshed',
+      'com_ui_load_more',
+      'com_ui_more_options',
+      'com_ui_new_chat_in_project',
+      'com_ui_new_project',
+      'com_ui_no_project_chats',
+      'com_ui_open_project',
+      'com_ui_pinned',
+      'com_ui_project_delete_error',
+      'com_ui_project_name',
+      'com_ui_project_rename_error',
+      'com_ui_project_update_error',
+      'com_ui_project_updated',
+      'com_ui_projects',
+      'com_ui_remove_from_project',
+      'com_ui_rename_project',
+      'com_ui_select_project',
+      'com_ui_share_files',
+      'com_ui_share_files_description',
+      'com_ui_share_files_refresh_note',
+      'com_ui_shared_link_manage_access',
+      'com_ui_unassigned',
+    ] as const;
+    const chinese = SimplifiedChinese as Record<string, string>;
+    const english = English as Record<string, string>;
+
+    for (const key of sidebarKeys) {
+      expect(chinese[key]).toBeDefined();
+      expect(chinese[key]).not.toBe(english[key]);
+    }
+    expect(SimplifiedChinese.com_ui_new_chat).toBe('新对话');
   });
 
   it('should normalize language selector values to locale files', () => {

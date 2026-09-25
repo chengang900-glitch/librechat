@@ -1,0 +1,19 @@
+services:
+  librechat:
+    image: enterprise-ai/librechat:v0.8.8-rc2-portal.knowledge.1
+    build:
+      context: ../source/LibreChat-upgrade-v0.8.8-rc2
+      dockerfile: Dockerfile.multi
+      target: api-build
+    environment:
+      KNOWLEDGE_PORTAL_ENABLED: "true"
+      WEKNORA_BASE_URL: http://WeKnora-app:8080/api/v1
+      WEKNORA_COMPANY_POLICY_KB_ID: ${WEKNORA_COMPANY_POLICY_KB_ID}
+      WEKNORA_COMPANY_POLICY_READ_KEY: ${WEKNORA_COMPANY_POLICY_READ_KEY}
+      WEKNORA_COMPANY_POLICY_INGEST_KEY: ${WEKNORA_COMPANY_POLICY_INGEST_KEY}
+    networks:
+      weknora_WeKnora-network:
+
+networks:
+  weknora_WeKnora-network:
+    external: true

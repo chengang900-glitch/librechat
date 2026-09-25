@@ -91,7 +91,12 @@ function HelpSubmenu({
   );
 }
 
-function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
+type AccountSettingsProps = {
+  collapsed?: boolean;
+  placement?: 'sidebar' | 'topbar';
+};
+
+function AccountSettings({ collapsed = false, placement = 'sidebar' }: AccountSettingsProps) {
   const localize = useLocalize();
   const { user, isAuthenticated, logout } = useAuthContext();
   const { data: startupConfig } = useGetStartupConfig();
@@ -102,9 +107,23 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const setShowShortcutsDialog = useSetRecoilState(store.showShortcutsDialog);
   const [showArchived, setShowArchived] = useState(false);
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null);
+  const isTopbar = placement === 'topbar';
+  let menuPlacement: 'bottom-end' | 'right-end' | undefined;
+  let transformOrigin = 'bottom';
+  let translate = '0 -4px';
+
+  if (isTopbar) {
+    menuPlacement = 'bottom-end';
+    transformOrigin = 'right top';
+    translate = '0 4px';
+  } else if (collapsed) {
+    menuPlacement = 'right-end';
+    transformOrigin = 'left bottom';
+    translate = '4px 0';
+  }
 
   return (
-    <Menu.MenuProvider placement={collapsed ? 'right-end' : undefined}>
+    <Menu.MenuProvider placement={menuPlacement}>
       <Menu.MenuButton
         ref={accountSettingsButtonRef}
         aria-label={localize('com_nav_account_settings')}
@@ -135,8 +154,8 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
         portal
         className="account-settings-popover popover-ui z-[125] w-[305px] rounded-lg md:w-[244px]"
         style={{
-          transformOrigin: collapsed ? 'left bottom' : 'bottom',
-          translate: collapsed ? '4px 0' : '0 -4px',
+          transformOrigin,
+          translate,
         }}
       >
         <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">

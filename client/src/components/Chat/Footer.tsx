@@ -20,6 +20,7 @@ type FooterProps = {
 
 type FooterStartupConfig = Pick<Partial<TStartupConfig>, 'analyticsGtmId' | 'customFooter'> & {
   interface?: Pick<NonNullable<TStartupConfig['interface']>, 'privacyPolicy' | 'termsOfService'>;
+  portal?: Pick<NonNullable<TStartupConfig['portal']>, 'enabled'>;
 };
 
 /**
@@ -93,6 +94,10 @@ function Footer({ className, startupConfig, configuredOnly = false }: FooterProp
       TagManager.initialize(tagManagerArgs);
     }
   }, [config?.analyticsGtmId]);
+
+  if (config?.portal?.enabled === true) {
+    return null;
+  }
 
   const mainContentRender = mainContentParts.map((text, index) => (
     <React.Fragment key={`main-content-part-${index}`}>

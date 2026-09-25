@@ -15,6 +15,7 @@ function Sidebar({
   onLeaveInsights,
   onResizeStart,
   onResizeKeyboard,
+  showAccountSettings,
 }: {
   links: NavLink[];
   expanded: boolean;
@@ -26,6 +27,7 @@ function Sidebar({
   onLeaveInsights: () => void;
   onResizeStart: (e: React.MouseEvent) => void;
   onResizeKeyboard: (direction: 'shrink' | 'grow') => void;
+  showAccountSettings: boolean;
 }) {
   return (
     <>
@@ -36,6 +38,7 @@ function Sidebar({
           onCollapse={onCollapse}
           onExpand={onExpand}
           onLeaveInsights={onLeaveInsights}
+          showAccountSettings={showAccountSettings}
         />
         <nav
           className={cn(

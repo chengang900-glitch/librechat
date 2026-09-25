@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { useRecoilValue } from 'recoil';
-import { Outlet } from 'react-router-dom';
 import { useMediaQuery } from '@librechat/client';
+import { Outlet, useLocation } from 'react-router-dom';
 import {
   UnifiedSidebar,
   SIDEBAR_TRANSITION,
@@ -41,6 +41,7 @@ import { TermsAndConditionsModal } from '~/components/ui';
 import useDrawerSwipe from '~/hooks/Nav/useDrawerSwipe';
 import { useHealthCheck } from '~/data-provider';
 import { Banner } from '~/components/Banners';
+import { PortalTopNav } from '~/portal';
 import store from '~/store';
 
 /** Isolates keyboard shortcut listeners so they only mount after auth. */
@@ -57,6 +58,8 @@ function KeyboardShortcutsProvider() {
 export default function Root() {
   const [showTerms, setShowTerms] = useState(false);
   const [bannerHeight, setBannerHeight] = useState(0);
+  const location = useLocation();
+  const isPortalRoute = location.pathname.startsWith('/portal/');
   /** Shared with the drawer so the two agree on the breakpoint-transition frame. */
   const {
     isSmallScreen,
@@ -103,7 +106,7 @@ export default function Root() {
     /** Auth gates the whole tree below (`return null`), so the swipe surfaces
      * only exist once authenticated — enabling earlier would attach to
      * nothing and never re-run when they mount. */
-    enabled: isSmallScreen && isAuthenticated,
+    enabled: isSmallScreen && isAuthenticated && !isPortalRoute,
     open: sidebarExpanded,
     onOpenChange: handleDrawerOpenChange,
   });
@@ -143,6 +146,9 @@ export default function Root() {
     return null;
   }
 
+  const portalEnabled = config?.portal?.enabled === true;
+  const portalNavigationHeight = portalEnabled ? 56 : 0;
+
   return (
     <CodeHighlightThrottleContext.Provider value={highlightThrottleMs}>
       <SetConvoProvider>
@@ -151,7 +157,11 @@ export default function Root() {
             <AgentsMapContext.Provider value={agentsMap}>
               <PromptGroupsProvider>
                 <Banner onHeightChange={setBannerHeight} />
-                <div className="flex" style={{ height: `calc(100dvh - ${bannerHeight}px)` }}>
+                {portalEnabled && config?.portal && <PortalTopNav config={config.portal} />}
+                <div
+                  className="flex"
+                  style={{ height: `calc(100dvh - ${bannerHeight + portalNavigationHeight}px)` }}
+                >
                   <div
                     className="relative z-0 flex h-full w-full overflow-hidden"
                     /** The drawer and the pane both read this, so their travel
@@ -167,7 +177,9 @@ export default function Root() {
                     {/* The drawer stops being painted once it is closed and
                         settled, so it needs the same travel window the scrim and
                         the pane's `inert` read. */}
-                    <UnifiedSidebar isSliding={isSliding} />
+                    {!isPortalRoute && (
+                      <UnifiedSidebar isSliding={isSliding} showAccountSettings={!portalEnabled} />
+                    )}
                     <div
                       ref={paneRef}
                       /** Focus target of last resort when the drawer closes on a
@@ -177,14 +189,21 @@ export default function Root() {
                       style={{
                         /** A percentage of the pane's own width, so it tracks the
                          *  drawer without a literal and survives rotation. */
-                        transform: isSmallScreen && sidebarExpanded ? MOBILE_PANE_SHIFT : 'none',
+                        transform:
+                          !isPortalRoute && isSmallScreen && sidebarExpanded
+                            ? MOBILE_PANE_SHIFT
+                            : 'none',
                         transition: prefersReducedMotion ? undefined : SIDEBAR_TRANSITION,
                       }}
                       /** Recoil's flip is deferred past the opening frames and
                        *  the closing transition outlives it at the other end, so
                        *  `isSliding` covers the travel `sidebarExpanded` brackets
                        *  too late and drops too early. */
-                      inert={isSmallScreen && (sidebarExpanded || isSliding) ? '' : undefined}
+                      inert={
+                        !isPortalRoute && isSmallScreen && (sidebarExpanded || isSliding)
+                          ? ''
+                          : undefined
+                      }
                     >
                       <Outlet />
                     </div>
@@ -195,14 +214,16 @@ export default function Root() {
                       the deferred flip has not committed yet. Once expanded
                       lands, a full-width drawer covers it, so keeping it
                       mounted would only expose a duplicate dismiss control. */}
-                    {isSmallScreen && (drawerStrip || (isSliding && !sidebarExpanded)) && (
-                      <MobileDrawerScrim
-                        expanded={sidebarExpanded}
-                        isSliding={isSliding}
-                        prefersReducedMotion={prefersReducedMotion}
-                        onClick={onScrimClick}
-                      />
-                    )}
+                    {!isPortalRoute &&
+                      isSmallScreen &&
+                      (drawerStrip || (isSliding && !sidebarExpanded)) && (
+                        <MobileDrawerScrim
+                          expanded={sidebarExpanded}
+                          isSliding={isSliding}
+                          prefersReducedMotion={prefersReducedMotion}
+                          onClick={onScrimClick}
+                        />
+                      )}
                   </div>
                 </div>
               </PromptGroupsProvider>

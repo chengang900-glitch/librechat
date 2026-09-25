@@ -2350,6 +2350,7 @@ export type EndpointsDropParamsMap = Record<string, string[] | Record<string, st
 
 export type TStartupConfig = {
   appTitle: string;
+  portal?: import('./portal').TPortalStartupConfig;
   socialLogins?: string[];
   langfuseFanoutEnabled?: boolean;
   langfuseConnectionAccess?: boolean;

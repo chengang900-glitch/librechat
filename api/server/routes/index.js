@@ -43,9 +43,15 @@ const user = require('./user');
 const mcp = require('./mcp');
 const rum = require('./rum');
 const insights = require('./insights');
+const portal = require('./portal');
+const portalKnowledge = require('./portalKnowledge');
+const adminPortal = require('./admin/portal');
 
 module.exports = {
   insights,
+  portal,
+  portalKnowledge,
+  adminPortal,
   rum,
   mcp,
   auth,

@@ -85,6 +85,7 @@ const configureSocialLogins = require('./socialLogins');
 const createSpaFallback = require('./utils/fallback');
 const { getAppConfig } = require('./services/Config');
 const staticCache = require('./utils/staticCache');
+const { requireJwtAuth } = require('./middleware');
 const noIndex = require('./middleware/noIndex');
 const routes = require('./routes');
 const agentEventMethods = require('~/models');
@@ -407,6 +408,7 @@ const startServer = async () => {
   app.use('/api/admin/skills', routes.adminSkills);
   app.use('/api/admin/users', routes.adminUsers);
   app.use('/api/admin/audit-log', routes.adminAuditLog);
+  app.use('/api/admin/portal', routes.adminPortal);
   app.use('/api/actions', routes.actions);
   app.use('/api/keys', routes.keys);
   app.use('/api/api-keys', routes.apiKeys);
@@ -427,6 +429,13 @@ const startServer = async () => {
   app.use('/api/assistants', routes.assistants);
   app.use('/api/files', await routes.files.initialize());
   app.use(
+    '/images/portal/',
+    (req, res, next) => (isEnabled(process.env.PORTAL_ENABLED) ? next() : res.sendStatus(404)),
+    requireJwtAuth,
+    staticCache(path.join(appConfig.paths.imageOutput, 'portal')),
+  );
+
+  app.use(
     '/images/',
     createValidateImageRequest({
       secureImageLinks: appConfig.secureImageLinks,
@@ -445,6 +454,8 @@ const startServer = async () => {
   app.use('/api/tags', routes.tags);
   app.use('/api/mcp', routes.mcp);
   app.use('/api/rum', routes.rum);
+  app.use('/api/portal', routes.portal);
+  app.use('/api/portal/knowledge', routes.portalKnowledge);
 
   app.use('/metrics', metricsRouter);
 

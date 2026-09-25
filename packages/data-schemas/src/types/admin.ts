@@ -56,6 +56,7 @@ export const AUDIT_CATEGORIES = [
   'permission',
   'auth',
   'approval',
+  'portal',
 ] as const;
 export type AuditCategory = (typeof AUDIT_CATEGORIES)[number];
 
@@ -70,6 +71,21 @@ export const AUDIT_ACTIONS = [
   'grant.removed',
   'permission.insights_assigned',
   'permission.insights_removed',
+  'portal.group.created',
+  'portal.group.updated',
+  'portal.group.deleted',
+  'portal.app.created',
+  'portal.app.updated',
+  'portal.app.deleted',
+  'portal.app.launched',
+  'portal.app.launch_requested',
+  'portal.knowledge.document_uploaded',
+  'portal.knowledge.document_previewed',
+  'portal.knowledge.document_downloaded',
+  'portal.knowledge.document_reparsed',
+  'portal.knowledge.document_parse_cancelled',
+  'portal.knowledge.document_deleted',
+  'portal.knowledge.question_asked',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -79,6 +95,21 @@ export const AUDIT_ACTION_CATEGORY: Record<AuditAction, AuditCategory> = {
   'grant.removed': 'grant',
   'permission.insights_assigned': 'permission',
   'permission.insights_removed': 'permission',
+  'portal.group.created': 'portal',
+  'portal.group.updated': 'portal',
+  'portal.group.deleted': 'portal',
+  'portal.app.created': 'portal',
+  'portal.app.updated': 'portal',
+  'portal.app.deleted': 'portal',
+  'portal.app.launched': 'portal',
+  'portal.app.launch_requested': 'portal',
+  'portal.knowledge.document_uploaded': 'portal',
+  'portal.knowledge.document_previewed': 'portal',
+  'portal.knowledge.document_downloaded': 'portal',
+  'portal.knowledge.document_reparsed': 'portal',
+  'portal.knowledge.document_parse_cancelled': 'portal',
+  'portal.knowledge.document_deleted': 'portal',
+  'portal.knowledge.question_asked': 'portal',
 };
 
 /** Result of the audited operation. Kept first-class instead of being encoded

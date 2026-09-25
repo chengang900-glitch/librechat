@@ -1,5 +1,8 @@
 import { createAgentQueuedTurnModel, createAgentQueuedTurnSequenceModel } from './queuedTurn';
+import { createPortalKnowledgeFavoriteModel } from './portal/knowledgeFavorite';
+import { createPortalKnowledgeSessionModel } from './portal/knowledgeSession';
 import { createAgentTriggerLaneSequenceModel } from './triggerLaneSequence';
+import { createPortalKnowledgeRecentModel } from './portal/knowledgeRecent';
 import { createScheduleModel, createScheduleRunModel } from './schedule';
 import { getTenantIndexMigrationHint } from '~/migrations/tenantIndexes';
 import { createSkillSyncCredentialModel } from './skillSyncCredential';
@@ -10,7 +13,9 @@ import { createAgentTriggerDeliveryModel } from './triggerDelivery';
 import { createSkillSyncStatusModel } from './skillSyncStatus';
 import { createConversationTagModel } from './conversationTag';
 import { createCodeEnvironmentModel } from './codeEnvironment';
+import { createPortalFavoriteModel } from './portal/favorite';
 import { createAgentCategoryModel } from './agentCategory';
+import { createPortalGroupModel } from './portal/group';
 import { createChatProjectModel } from './chatProject';
 import { createAgentApiKeyModel } from './agentApiKey';
 import { createTransactionModel } from './transaction';
@@ -20,6 +25,7 @@ import { createPluginAuthModel } from './pluginAuth';
 import { createSharedLinkModel } from './sharedLink';
 import { createAccessRoleModel } from './accessRole';
 import { createToolFavoriteModel } from './favorite';
+import { createPortalAppModel } from './portal/app';
 import { createMCPServerModel } from './mcpServer';
 import { createAssistantModel } from './assistant';
 import { createSkillFileModel } from './skillFile';
@@ -88,6 +94,12 @@ export function createModels(mongoose: typeof import('mongoose')): {
   AuditLog: ReturnType<typeof createAuditLogModel>;
   Group: ReturnType<typeof createGroupModel>;
   Config: ReturnType<typeof createConfigModel>;
+  PortalGroup: ReturnType<typeof createPortalGroupModel>;
+  PortalApp: ReturnType<typeof createPortalAppModel>;
+  PortalFavorite: ReturnType<typeof createPortalFavoriteModel>;
+  PortalKnowledgeFavorite: ReturnType<typeof createPortalKnowledgeFavoriteModel>;
+  PortalKnowledgeRecent: ReturnType<typeof createPortalKnowledgeRecentModel>;
+  PortalKnowledgeSession: ReturnType<typeof createPortalKnowledgeSessionModel>;
   AgentTriggerDelivery: ReturnType<typeof createAgentTriggerDeliveryModel>;
   AgentTriggerLaneSequence: ReturnType<typeof createAgentTriggerLaneSequenceModel>;
   AgentTriggerUserPurge: ReturnType<typeof createAgentTriggerUserPurgeModel>;
@@ -137,6 +149,12 @@ export function createModels(mongoose: typeof import('mongoose')): {
     AuditLog: createAuditLogModel(mongoose),
     Group: createGroupModel(mongoose),
     Config: createConfigModel(mongoose),
+    PortalGroup: createPortalGroupModel(mongoose),
+    PortalApp: createPortalAppModel(mongoose),
+    PortalFavorite: createPortalFavoriteModel(mongoose),
+    PortalKnowledgeFavorite: createPortalKnowledgeFavoriteModel(mongoose),
+    PortalKnowledgeRecent: createPortalKnowledgeRecentModel(mongoose),
+    PortalKnowledgeSession: createPortalKnowledgeSessionModel(mongoose),
     AgentTriggerDelivery: createAgentTriggerDeliveryModel(mongoose),
     AgentTriggerLaneSequence: createAgentTriggerLaneSequenceModel(mongoose),
     AgentTriggerUserPurge: createAgentTriggerUserPurgeModel(mongoose),

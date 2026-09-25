@@ -23,12 +23,14 @@ function Header({
   onClose,
   onLeaveInsights,
   routeActiveId,
+  showAccountSettings = true,
 }: {
   links: NavLink[];
   expanded: boolean;
   onClose: () => void;
   onLeaveInsights?: () => void;
   routeActiveId?: string;
+  showAccountSettings?: boolean;
 }) {
   const localize = useLocalize();
   const toggleSidebarAriaKey = useShortcutAriaKey('toggleSidebar');
@@ -76,9 +78,11 @@ function Header({
         routeActiveId={routeActiveId}
       />
       <AgentMarketplaceButton side="bottom" onNavigate={onClose} />
-      <Suspense fallback={<Skeleton className="size-9 rounded-lg" />}>
-        <AccountSettings collapsed />
-      </Suspense>
+      {showAccountSettings && (
+        <Suspense fallback={<Skeleton className="size-9 rounded-lg" />}>
+          <AccountSettings collapsed />
+        </Suspense>
+      )}
     </div>
   );
 }

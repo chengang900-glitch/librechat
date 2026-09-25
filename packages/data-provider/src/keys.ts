@@ -93,6 +93,11 @@ export enum QueryKeys {
   skillStates = 'skillStates',
   /* General user favorites */
   favorites = 'favorites',
+  portalCatalog = 'portalCatalog',
+  portalKnowledgeBase = 'portalKnowledgeBase',
+  portalKnowledgeDocuments = 'portalKnowledgeDocuments',
+  portalKnowledgeFolders = 'portalKnowledgeFolders',
+  portalAdminCatalog = 'portalAdminCatalog',
   /* Scheduled chats */
   schedules = 'schedules',
   schedule = 'schedule',
@@ -158,6 +163,8 @@ export enum MutationKeys {
   deleteSkillNode = 'deleteSkillNode',
   updateSkillNodeContent = 'updateSkillNodeContent',
   convoPin = 'convoPin',
+  portalFavorite = 'portalFavorite',
+  portalAdmin = 'portalAdmin',
   archiveAllConversations = 'archiveAllConversations',
   createSchedule = 'createSchedule',
   updateSchedule = 'updateSchedule',

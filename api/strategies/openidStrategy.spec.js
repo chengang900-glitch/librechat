@@ -139,6 +139,7 @@ jest.mock('openid-client', () => {
       expires_in: 3600,
     }),
     customFetch: Symbol('customFetch'),
+    allowInsecureRequests: jest.fn(),
   };
 });
 
@@ -291,6 +292,18 @@ describe('setupOpenId', () => {
     beforeEach(() => {
       openidClient = require('openid-client');
       openidClient.discovery.mockClear();
+    });
+
+    it('allows HTTP discovery only for an HTTP issuer', async () => {
+      process.env.OPENID_ISSUER = 'http://issuer.example.com/realms/enterprise-ai';
+      await setupOpenId();
+      const [, , , , httpOptions] = openidClient.discovery.mock.calls.at(-1);
+      expect(httpOptions.execute).toEqual([openidClient.allowInsecureRequests]);
+
+      process.env.OPENID_ISSUER = 'https://issuer.example.com/realms/enterprise-ai';
+      await setupOpenId();
+      const [, , , , httpsOptions] = openidClient.discovery.mock.calls.at(-1);
+      expect(httpsOptions.execute).toBeUndefined();
     });
 
     it('sets token_endpoint_auth_method to none for PKCE without a client secret', async () => {

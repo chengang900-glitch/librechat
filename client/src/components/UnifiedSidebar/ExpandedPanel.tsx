@@ -129,6 +129,7 @@ function ExpandedPanel({
   onExpand,
   onNavigate,
   onLeaveInsights,
+  showAccountSettings = true,
 }: {
   links: NavLink[];
   expanded?: boolean;
@@ -136,6 +137,7 @@ function ExpandedPanel({
   onExpand?: () => void;
   onNavigate?: () => void;
   onLeaveInsights?: () => void;
+  showAccountSettings?: boolean;
 }) {
   const localize = useLocalize();
   const location = useLocation();
@@ -192,11 +194,13 @@ function ExpandedPanel({
         ))}
       </div>
 
-      <div className="mt-auto">
-        <Suspense fallback={<Skeleton className="h-9 w-9 rounded-lg" />}>
-          <AccountSettings collapsed />
-        </Suspense>
-      </div>
+      {showAccountSettings && (
+        <div className="mt-auto">
+          <Suspense fallback={<Skeleton className="h-9 w-9 rounded-lg" />}>
+            <AccountSettings collapsed />
+          </Suspense>
+        </div>
+      )}
     </div>
   );
 }

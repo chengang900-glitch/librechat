@@ -930,6 +930,9 @@ async function setupOpenId() {
       undefined,
       {
         [client.customFetch]: customFetch,
+        ...(new URL(process.env.OPENID_ISSUER).protocol === 'http:'
+          ? { execute: [client.allowInsecureRequests] }
+          : {}),
       },
     );
 

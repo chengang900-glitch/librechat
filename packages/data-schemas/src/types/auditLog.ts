@@ -104,6 +104,8 @@ export interface AuditLogFilters {
   actorQuery?: string;
   /** Exact match on `target.type`. */
   targetType?: string;
+  /** Exact match on the stable target id. */
+  targetId?: string;
   /** Case-insensitive substring match against the denormalized `target.name`. */
   targetQuery?: string;
   /** Case-insensitive substring match against `metadata.capability`. */

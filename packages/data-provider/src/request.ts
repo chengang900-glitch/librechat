@@ -24,6 +24,19 @@ async function _post(url: string, data?: any) {
   return response.data;
 }
 
+async function _postText(url: string, data?: any, options?: AxiosRequestConfig) {
+  const response = await axios.post(url, JSON.stringify(data), {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+      ...(options?.headers ?? {}),
+    },
+    responseType: 'text',
+  });
+  return response.data as string;
+}
+
 async function _postMultiPart(url: string, formData: FormData, options?: AxiosRequestConfig) {
   const response = await axios.post(url, formData, {
     ...options,
@@ -61,6 +74,14 @@ async function _deleteWithOptions<T>(url: string, options?: AxiosRequestConfig):
 async function _patch(url: string, data?: any) {
   const response = await axios.patch(url, JSON.stringify(data), {
     headers: { 'Content-Type': 'application/json' },
+  });
+  return response.data;
+}
+
+async function _patchMultiPart(url: string, formData: FormData, options?: AxiosRequestConfig) {
+  const response = await axios.patch(url, formData, {
+    ...options,
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
 }
@@ -423,12 +444,14 @@ export default {
   get: _get,
   getResponse: _getResponse,
   post: _post,
+  postText: _postText,
   postMultiPart: _postMultiPart,
   postTTS: _postTTS,
   put: _put,
   delete: _delete,
   deleteWithOptions: _deleteWithOptions,
   patch: _patch,
+  patchMultiPart: _patchMultiPart,
   authenticatedFetch: _authenticatedFetch,
   refreshToken,
   dispatchTokenUpdatedEvent,

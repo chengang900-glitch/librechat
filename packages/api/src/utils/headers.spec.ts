@@ -167,6 +167,27 @@ describe('resolveConfigHeaders', () => {
     delete process.env.HEADERS_SPEC_IDEMPOTENT;
   });
 
+  it('does not replace placeholders in a shared agent header template', () => {
+    const sharedConfiguration = {
+      defaultHeaders: { 'X-User-Id': '{{LIBRECHAT_USER_ID}}' },
+    };
+    const firstRequestConfig = { configuration: sharedConfiguration } as unknown as RunLLMConfig;
+    const secondRequestConfig = { configuration: sharedConfiguration } as unknown as RunLLMConfig;
+
+    resolveConfigHeaders({ llmConfig: firstRequestConfig, user: { id: 'first-user' }, body });
+    resolveConfigHeaders({ llmConfig: secondRequestConfig, user: { id: 'second-user' }, body });
+
+    expect(sharedConfiguration.defaultHeaders).toEqual({
+      'X-User-Id': '{{LIBRECHAT_USER_ID}}',
+    });
+    expect(firstRequestConfig.configuration?.defaultHeaders).toEqual({
+      'X-User-Id': 'first-user',
+    });
+    expect(secondRequestConfig.configuration?.defaultHeaders).toEqual({
+      'X-User-Id': 'second-user',
+    });
+  });
+
   it('resolves env-var placeholders in header values', () => {
     process.env.HEADERS_SPEC_GATEWAY_KEY = 'secret-key';
     const llmConfig = {

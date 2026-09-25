@@ -46,7 +46,13 @@ function SidebarChatProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function UnifiedSidebar({ isSliding = false }: { isSliding?: boolean }) {
+function UnifiedSidebar({
+  isSliding = false,
+  showAccountSettings = true,
+}: {
+  isSliding?: boolean;
+  showAccountSettings?: boolean;
+}) {
   const localize = useLocalize();
   const location = useLocation();
   const navigate = useNavigate();
@@ -214,6 +220,7 @@ function UnifiedSidebar({ isSliding = false }: { isSliding?: boolean }) {
         <SidebarChatProvider>
           <ActivePanelProvider>
             <MobileHeader
+              showAccountSettings={showAccountSettings}
               links={links}
               expanded={expanded}
               onClose={handleCollapse}
@@ -264,6 +271,7 @@ function UnifiedSidebar({ isSliding = false }: { isSliding?: boolean }) {
             onLeaveInsights={handleLeaveInsights}
             onResizeStart={handleResizeStart}
             onResizeKeyboard={handleResizeKeyboard}
+            showAccountSettings={showAccountSettings}
           />
         </aside>
       </ActivePanelProvider>

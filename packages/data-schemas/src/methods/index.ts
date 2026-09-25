@@ -171,6 +171,7 @@ import {
 } from './agent';
 /* Config */
 import { createConfigMethods, type ConfigMethods } from './config';
+import { createPortalMethods, type PortalMethods } from './portal';
 import {
   createMCPAuthorityMethods,
   MCPAuthorityProofError,
@@ -269,7 +270,8 @@ export type AllMethods = UserMethods &
   AgentMethods &
   ConfigMethods &
   MCPAuthorityMethods &
-  InsightsMethods;
+  InsightsMethods &
+  PortalMethods;
 
 /** Dependencies injected from the api layer into createMethods */
 export interface CreateMethodsDeps {
@@ -507,6 +509,7 @@ export function createMethods(
     ...createMCPAuthorityMethods(mongoose),
     /* Insights */
     ...createInsightsMethods(mongoose),
+    ...createPortalMethods(mongoose),
   };
 }
 
@@ -589,6 +592,7 @@ export type {
   MCPAuthorityConfigSourceDocument,
   MCPAuthorityCredentialSourceDocument,
   InsightsMethods,
+  PortalMethods,
 };
 
 export { recordAgentEventActorReceiptMetric, setAgentEventActorReceiptMetricObserver };

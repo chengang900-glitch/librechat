@@ -131,14 +131,16 @@ export function resolveModelHeaders({
 }
 
 /**
- * Header maps already resolved by `resolveConfigHeaders`. `resolveConfigHeaders`
- * mutates config objects in place, and the same initialized agent (hence the same
- * nested header objects) can flow through `buildAgentInput` more than once (root +
- * subagent, multiple parents). Resolving twice would run env expansion over values
- * already substituted with user/body data, violating the env-before-user invariant
- * documented in `resolveHeaders`. Tracking resolved maps makes resolution
- * idempotent across reuse. Keyed by object identity (per-request fresh objects), so
- * nothing carries across requests.
+ * Header maps already resolved by `resolveConfigHeaders`. Resolving twice would run
+ * env expansion over values already substituted with user/body data, violating the
+ * env-before-user invariant documented in `resolveHeaders`. Tracking resolved maps
+ * keeps repeated calls on the same request config idempotent.
+ *
+ * The model config is only shallow-copied when a run is built, so its nested header
+ * containers can still belong to the initialized agent and be reused by later
+ * requests. `resolveConfigHeaders` must therefore replace those containers instead
+ * of mutating them; otherwise the first request's user token becomes the template
+ * for every later request.
  */
 const resolvedHeaderMaps = new WeakSet<object>();
 
@@ -193,14 +195,19 @@ export function resolveConfigHeaders({
 
   const configuration = llmConfig.configuration as DefaultHeadersContainer | undefined;
   if (configuration?.defaultHeaders != null) {
-    configuration.defaultHeaders = resolveOnce(configuration.defaultHeaders);
+    llmConfig.configuration = {
+      ...configuration,
+      defaultHeaders: resolveOnce(configuration.defaultHeaders),
+    };
   }
 
-  const clientOptions = (llmConfig as AnthropicClientOptions).clientOptions as
-    | DefaultHeadersContainer
-    | undefined;
+  const anthropicConfig = llmConfig as AnthropicClientOptions;
+  const clientOptions = anthropicConfig.clientOptions as DefaultHeadersContainer | undefined;
   if (clientOptions?.defaultHeaders != null) {
-    clientOptions.defaultHeaders = resolveOnce(clientOptions.defaultHeaders);
+    anthropicConfig.clientOptions = {
+      ...clientOptions,
+      defaultHeaders: resolveOnce(clientOptions.defaultHeaders),
+    };
   }
 
   const customHeadersContainer = llmConfig as CustomHeadersContainer;

@@ -44,6 +44,94 @@ export const health = () => `${BASE_URL}/health`;
 export const user = () => `${BASE_URL}/api/user`;
 export const userPreferences = () => `${user()}/preferences`;
 
+const portalRoot = `${BASE_URL}/api/portal`;
+const portalAdminRoot = `${BASE_URL}/api/admin/portal`;
+export const portalCatalog = () => `${portalRoot}/catalog`;
+export const portalFavorite = (appId: string) =>
+  `${portalRoot}/favorites/${encodeURIComponent(appId)}`;
+export const portalLaunch = (appId: string) =>
+  `${portalRoot}/apps/${encodeURIComponent(appId)}/launch`;
+const portalKnowledgeRoot = `${portalRoot}/knowledge`;
+export const portalKnowledgeBase = () => `${portalKnowledgeRoot}/bases`;
+const portalKnowledgeWikiRoot = `${portalKnowledgeRoot}/wiki`;
+export type PortalKnowledgeWikiPageQuery = {
+  page?: number;
+  pageSize?: number;
+};
+export const portalKnowledgeWikiIndex = () => `${portalKnowledgeWikiRoot}/index`;
+export const portalKnowledgeWikiPages = (params: PortalKnowledgeWikiPageQuery = {}) =>
+  `${portalKnowledgeWikiRoot}/pages${buildQuery({
+    page: params.page ?? 1,
+    page_size: params.pageSize ?? 50,
+  })}`;
+export const portalKnowledgeWikiPage = (slug: string) =>
+  `${portalKnowledgeWikiRoot}/page${buildQuery({ slug })}`;
+export const portalKnowledgeWikiFolders = () => `${portalKnowledgeWikiRoot}/folders`;
+export const portalKnowledgeWikiGraph = () => `${portalKnowledgeWikiRoot}/graph`;
+export const portalKnowledgeWikiSearch = (query: string) =>
+  `${portalKnowledgeWikiRoot}/search${buildQuery({ q: query })}`;
+export type PortalKnowledgeDocumentQuery = {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  fileType?: string;
+  parseStatus?: string;
+  source?: string;
+  startTime?: string;
+  endTime?: string;
+  folderPath?: string;
+  folderRecursive?: boolean;
+};
+export const portalKnowledgeDocuments = (params: PortalKnowledgeDocumentQuery = {}) =>
+  `${portalKnowledgeRoot}/documents${buildQuery({
+    page: params.page ?? 1,
+    page_size: params.pageSize ?? 50,
+    keyword: params.keyword,
+    file_type: params.fileType,
+    parse_status: params.parseStatus,
+    source: params.source,
+    start_time: params.startTime,
+    end_time: params.endTime,
+    folder_path: params.folderPath,
+    folder_recursive: params.folderRecursive ? 'true' : undefined,
+  })}`;
+export const portalKnowledgeFolders = () => `${portalKnowledgeRoot}/folders`;
+export const portalKnowledgeSearch = () => `${portalKnowledgeRoot}/search`;
+export const portalKnowledgeUpload = () => `${portalKnowledgeRoot}/documents`;
+export const portalKnowledgeDocumentPreview = (documentId: string) =>
+  `${portalKnowledgeRoot}/documents/${encodeURIComponent(documentId)}/preview`;
+export const portalKnowledgeDocumentDownload = (documentId: string) =>
+  `${portalKnowledgeRoot}/documents/${encodeURIComponent(documentId)}/download`;
+export const portalKnowledgeDocumentReparse = (documentId: string) =>
+  `${portalKnowledgeRoot}/documents/${encodeURIComponent(documentId)}/reparse`;
+export const portalKnowledgeDocumentCancelParse = (documentId: string) =>
+  `${portalKnowledgeRoot}/documents/${encodeURIComponent(documentId)}/cancel-parse`;
+export const portalKnowledgeDocumentMove = (documentId: string) =>
+  `${portalKnowledgeRoot}/documents/${encodeURIComponent(documentId)}/move`;
+export const portalKnowledgeDocumentDelete = (documentId: string) =>
+  `${portalKnowledgeRoot}/documents/${encodeURIComponent(documentId)}`;
+export const portalKnowledgeFavorites = () => `${portalKnowledgeRoot}/favorites`;
+export const portalKnowledgeFavorite = (targetType: string, targetId: string) =>
+  `${portalKnowledgeFavorites()}/${encodeURIComponent(targetType)}/${encodeURIComponent(targetId)}`;
+export const portalKnowledgeRecents = () => `${portalKnowledgeRoot}/recents`;
+export const portalKnowledgeAudit = () => `${portalKnowledgeRoot}/audit`;
+export const portalKnowledgeSessions = () => `${portalKnowledgeRoot}/sessions`;
+export const portalKnowledgeChat = (sessionId: string) =>
+  `${portalKnowledgeRoot}/chat/${encodeURIComponent(sessionId)}`;
+export const portalKnowledgeSessionStop = (sessionId: string) =>
+  `${portalKnowledgeRoot}/sessions/${encodeURIComponent(sessionId)}/stop`;
+export const portalKnowledgeSessionMessages = (sessionId: string) =>
+  `${portalKnowledgeRoot}/sessions/${encodeURIComponent(sessionId)}/messages`;
+export const portalKnowledgeSession = (sessionId: string) =>
+  `${portalKnowledgeRoot}/sessions/${encodeURIComponent(sessionId)}`;
+export const portalAdminCatalog = () => `${portalAdminRoot}/catalog`;
+export const portalAdminGroups = () => `${portalAdminRoot}/groups`;
+export const portalAdminGroup = (groupId: string) =>
+  `${portalAdminRoot}/groups/${encodeURIComponent(groupId)}`;
+export const portalAdminApps = () => `${portalAdminRoot}/apps`;
+export const portalAdminApp = (appId: string) =>
+  `${portalAdminRoot}/apps/${encodeURIComponent(appId)}`;
+
 export const balance = () => `${BASE_URL}/api/balance`;
 
 export const userPlugins = () => `${BASE_URL}/api/user/plugins`;

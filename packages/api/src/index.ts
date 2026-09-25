@@ -76,6 +76,7 @@ export * from './actions';
 export * from './prompts';
 /* Projects */
 export * from './projects';
+export * from './portal';
 /* Conversations */
 export * from './conversations';
 /* Skills */

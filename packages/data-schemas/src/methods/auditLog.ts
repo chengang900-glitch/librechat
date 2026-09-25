@@ -267,6 +267,9 @@ function buildFilter(chainKey: string, filters: AuditLogFilters): FilterQuery<IA
   if (filters.targetType) {
     query['target.type'] = filters.targetType;
   }
+  if (filters.targetId) {
+    query['target.id'] = filters.targetId;
+  }
   if (filters.targetQuery) {
     query['target.name'] = regexFilter(filters.targetQuery);
   }

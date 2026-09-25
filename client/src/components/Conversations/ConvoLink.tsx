@@ -48,7 +48,8 @@ const ConvoLink: React.FC<ConvoLinkProps> = ({
   const [isOverflowing, setIsOverflowing] = useState(false);
   const titleRef = useRef<HTMLSpanElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const displayTitle = title || localize('com_ui_untitled');
+  const displayTitle =
+    title === 'New Chat' ? localize('com_ui_new_chat') : title || localize('com_ui_untitled');
 
   useEffect(() => {
     const viewport = titleRef.current;
@@ -134,10 +135,10 @@ const ConvoLink: React.FC<ConvoLinkProps> = ({
       aria-label={
         isSharedBadgeVisible
           ? localize('com_ui_conversation_label_shared', {
-              title: title || localize('com_ui_untitled'),
+              title: displayTitle,
             })
           : localize('com_ui_conversation_label', {
-              title: title || localize('com_ui_untitled'),
+              title: displayTitle,
             })
       }
     >

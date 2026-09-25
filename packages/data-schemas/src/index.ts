@@ -85,6 +85,7 @@ export {
   AUDIT_ACTION_CATEGORY,
 } from './types/admin';
 export { GENESIS_HASH, PLATFORM_CHAIN_KEY } from './schema/auditLog';
+export { PortalDataError } from './methods/portal';
 export { default as logger, baseLogFormat } from './config/winston';
 export { default as meiliLogger } from './config/meiliLogger';
 export { jsonTruncateFormat, redactMessage } from './config/parsers';
