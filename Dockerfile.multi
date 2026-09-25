@@ -13,6 +13,7 @@ ARG BUILD_DATE=
 FROM node:24.16.0-alpine AS base-min
 ARG NPM_CI_TIMEOUT_SECONDS=1500
 ARG NPM_CI_ATTEMPTS=2
+ARG NPM_REGISTRY=https://registry.npmjs.org/
 RUN apk upgrade --no-cache
 RUN apk add --no-cache jemalloc
 # Set environment variable to use jemalloc
@@ -22,7 +23,9 @@ ENV SCARF_ANALYTICS=false
 
 WORKDIR /app
 RUN apk --no-cache add curl
-RUN npm config set fetch-retry-maxtimeout 600000 && \
+RUN npm config set registry "$NPM_REGISTRY" && \
+    npm config set replace-registry-host npmjs && \
+    npm config set fetch-retry-maxtimeout 600000 && \
     npm config set fetch-retries 5 && \
     npm config set fetch-retry-mintimeout 15000
 COPY package*.json ./
