@@ -309,7 +309,7 @@ Portal 镜像回滚使用上一个 Portal 标签；完全回到原生 LibreChat 
 - 候选镜像：enterprise-ai/librechat:v0.8.8-rc2-portal.migrate.2，镜像 ID sha256:df88c4b51d0265470a63fe958ad3088bf6bae12f720ef21436d49f872e753e29。
 - 已验证：Docker 多阶段构建通过；独立临时 MongoDB 运行态 /health 返回 200；门户已启用时 /api/portal/catalog 返回 401（匿名访问被正确拒绝）。
 - 未验证：生产 SSO 登录、真实用户权限、真实 Portal 数据、浏览器视觉验收；生产容器尚未替换。
-- 冲突处置：Root 与新版 UnifiedSidebar 抽屉实现保留上游行为，仅追加 Portal 顶栏和路由隔离；旧 Draw.io MCP 编译后 iframe 下载权限补丁未迁移，新版受限 MCP UI 渲染器保持原样；旧 OpenIDTokenService 未重新接线，由新版 OpenID session refresh 服务承担令牌刷新。
+- 冲突处置：Root 与新版 UnifiedSidebar 抽屉实现保留上游行为，仅追加 Portal 顶栏和路由隔离；该 rc2 迁移记录中的 Draw.io 补丁结论已由 rc4 源码级迁移记录修正。
 - 迁移工具包：/srv/enterprise-ai/artifacts/librechat-portal-migration-kit/releases/v0.8.8-rc2/；该目录包含基线精确可检验的二进制 patch、变更清单、校验和及迁移决策。
 
 **2026-09-10 v0.8.8-rc2 生产切换结果**
@@ -334,3 +334,13 @@ Portal 镜像回滚使用上一个 Portal 标签；完全回到原生 LibreChat 
 - 根因：新版 `/images/*` 受 JWT 保护；原生 `<img>` 请求不会携带 LibreChat 的 Authorization 请求头，因此即使已登录也会返回 401。图标文件及其持久化挂载本身完整。
 - 修复：`api/server/index.js` 保留 `/images/portal/*` 的 Portal 专用受保护静态路由；`packages/data-provider/src/data-service.ts` 使用现有认证请求链路以 Blob 获取图标，`client/src/portal/components/Card.tsx` 仅渲染短生命周期 Blob URL，并在卸载或图标变更时释放。不得放开原生 `/images/*` 或 Portal 图标目录匿名访问。
 - 升级迁移：专用受保护路由、认证 Blob 获取方法和卡片渲染逻辑必须作为同一项迁移；只迁移服务端路由不能修复浏览器原生图片请求。
+
+## 10. v0.8.8-rc4 升级结果（2026-09-26）
+
+- 官方基线：LibreChat v0.8.8-rc4，官方提交 `361553f`；定制源码提交 `849f7d3`，本地副本位于 `LibreChat-portal-rc4/`。
+- 实际运行镜像：`enterprise-ai/librechat:v0.8.8-rc4-portal.2`，镜像 ID `sha256:904a245f876e19755aab80553ebf9a2d9acd63cac8ce11f2c0c2b46ba0e33664`。
+- 已迁移：Portal 顶栏与路由、OIDC HTTP 兼容、知识中心与 WeKnora、Draw.io 下载权限、企业图表宽版布局、自定义模型端点的 MCP UI 资源解析。
+- Compose 使用原有基础、Portal、图表 MCP、图表布局、rc2 兼容和知识中心层，最后由 `compose.librechat-v0.8.8-rc4.yml` 固定 rc4 镜像并关闭源码重建。
+- 服务器验收：容器 running，重启次数 0；`/health`、`/livez`、`/readyz`、`/api/config` 和首页均返回 200；未认证的 Portal/知识中心 API 返回 401；WeKnora、Keycloak、MongoDB、Draw.io MCP、企业图表 MCP 均保持运行；上线后三分钟日志未出现 fatal、`endpoint_models_not_loaded` 或知识中心错误。
+- 代码验收：rc4 客户端定向测试 25 项、API MCP 解析测试 71 项通过；客户端生产构建通过；服务器切换前已完成配置、MongoDB、上传文件和 Compose 文件备份。
+- 待人工 UAT：使用真实 SSO 账号检查登录、Portal 页面、知识中心读写权限、Draw.io 下载、企业图表展示和真实模型/MCP 调用。
