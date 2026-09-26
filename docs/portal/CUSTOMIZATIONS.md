@@ -355,3 +355,11 @@ Portal 镜像回滚使用上一个 Portal 标签；完全回到原生 LibreChat 
 - 反向代理本地 bundler 时需允许浏览器跨域访问，并透传 WebSocket/Worker 所需响应；Worker 脚本响应的 `Content-Type` 必须是 JavaScript MIME（如 `application/javascript`），否则 Sandpack 仍会在浏览器端启动失败。
 - `SANDPACK_BUNDLER_URL` 只影响需要 Sandpack bundling 的类型，不是 HTML HTTP 兼容预览的前置条件。`http://sandpack:80` 只能作为容器内部地址，不能直接交给浏览器。
 - 回滚：移除 HTML 路由、`HtmlArtifactPreview.tsx`、`previewRevision` 和本 overlay；恢复 `SandboxArtifactTabs` 对所有类型调用 `ArtifactPreview` 即可。生产上线前必须重建 rc4 定制镜像并完成真实 HTTP 浏览器 UAT，当前源码/测试通过不等于线上已切换。
+
+### 11.1 测试服务器实际部署记录
+
+- 服务器实际使用正确的 `/srv/enterprise-ai/source/LibreChat-portal-rc4` rc4 源码目录；旧版 `/source/LibreChat` 未作为发布基线。
+- GHCR 拉取持续超时后，改用官方 GitHub Release `bundler-v12/bundler.zip`，在服务器本地用 `nginx:1.27-alpine` 构建 `enterprise-ai/sandpack-bundler:v12-http`。官方 Release 来源：[codesandbox-client Releases](https://github.com/LibreChat-AI/codesandbox-client/releases)。
+- Caddy HTTP 入口增加 `/sandpack/*` 的 `handle_path` 路由，反代到 `sandpack:80`，并设置 CORS 与 Worker JavaScript MIME；门户仍使用 `http://demo.uhoo.cn:9433`。
+- LibreChat 实际镜像：`enterprise-ai/librechat:v0.8.8-rc4-portal.3-http-artifacts-correct`；`SANDPACK_BUNDLER_URL=http://demo.uhoo.cn:9433/sandpack`。
+- 已验证：Sandpack 容器 `healthy`；外部 `http://demo.uhoo.cn:9433/sandpack/index.html` 返回 200；LibreChat `/readyz` 返回 `OK`；MongoDB、网关、Keycloak 和其他现有服务保持运行。
