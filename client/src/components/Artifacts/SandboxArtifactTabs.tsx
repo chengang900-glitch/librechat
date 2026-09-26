@@ -8,15 +8,19 @@ import useArtifactProps from '~/hooks/Artifacts/useArtifactProps';
 import { ArtifactCodeEditor } from './ArtifactCodeEditor';
 import { useCodeState } from '~/Providers/EditorContext';
 import { ArtifactPreview } from './ArtifactPreview';
+import { HtmlArtifactPreview } from './HtmlArtifactPreview';
 import { useShareContext } from '~/Providers';
+import { isHtmlArtifactType } from '~/utils/artifacts';
 
 export default function SandboxArtifactTabs({
   artifact,
   previewRef,
+  previewRevision = 0,
   isSharedConvo,
 }: {
   artifact: Artifact;
   previewRef: React.MutableRefObject<SandpackPreviewRef>;
+  previewRevision?: number;
   isSharedConvo?: boolean;
 }) {
   const { currentCode, setCurrentCode } = useCodeState();
@@ -44,6 +48,7 @@ export default function SandboxArtifactTabs({
 
   const { files, fileKey, template, sharedProps, deriveFiles } = useArtifactProps({ artifact });
   const editedCode = hasCurrentArtifactCode ? currentCode : undefined;
+  const isHtmlArtifact = isHtmlArtifactType(artifact.type);
 
   /* An artifact whose preview entry is derived from its source needs the whole
    * set rebuilt from the editor text; `ArtifactPreview` can only swap the file
@@ -73,15 +78,22 @@ export default function SandboxArtifactTabs({
         className="h-full w-full flex-grow overflow-hidden"
         tabIndex={-1}
       >
-        <ArtifactPreview
-          files={previewFiles}
-          fileKey={fileKey}
-          template={template}
-          previewRef={previewRef}
-          sharedProps={sharedProps}
-          currentCode={editedCode}
-          startupConfig={resolvedStartupConfig}
-        />
+        {isHtmlArtifact ? (
+          <HtmlArtifactPreview
+            html={editedCode ?? artifact.content ?? ''}
+            refreshKey={previewRevision}
+          />
+        ) : (
+          <ArtifactPreview
+            files={previewFiles}
+            fileKey={fileKey}
+            template={template}
+            previewRef={previewRef}
+            sharedProps={sharedProps}
+            currentCode={editedCode}
+            startupConfig={resolvedStartupConfig}
+          />
+        )}
       </Tabs.Content>
     </div>
   );

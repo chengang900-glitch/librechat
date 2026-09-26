@@ -36,6 +36,7 @@ export default function Artifacts() {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [previewRevision, setPreviewRevision] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [height, setHeight] = useState(90);
@@ -299,6 +300,7 @@ export default function Artifacts() {
 
   const handleRefresh = () => {
     setIsRefreshing(true);
+    setPreviewRevision((revision) => revision + 1);
     const client = previewRef.current?.getClient();
     if (client) {
       client.dispatch({ type: 'refresh' });
@@ -522,6 +524,7 @@ export default function Artifacts() {
               <ArtifactTabs
                 artifact={currentArtifact}
                 previewRef={previewRef as React.MutableRefObject<SandpackPreviewRef>}
+                previewRevision={previewRevision}
                 isSharedConvo={isSharedConvo}
                 onMermaidExportReady={handleMermaidExportReady}
               />

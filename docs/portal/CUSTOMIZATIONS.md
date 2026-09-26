@@ -344,3 +344,14 @@ Portal 镜像回滚使用上一个 Portal 标签；完全回到原生 LibreChat 
 - 服务器验收：容器 running，重启次数 0；`/health`、`/livez`、`/readyz`、`/api/config` 和首页均返回 200；未认证的 Portal/知识中心 API 返回 401；WeKnora、Keycloak、MongoDB、Draw.io MCP、企业图表 MCP 均保持运行；上线后三分钟日志未出现 fatal、`endpoint_models_not_loaded` 或知识中心错误。
 - 代码验收：rc4 客户端定向测试 25 项、API MCP 解析测试 71 项通过；客户端生产构建通过；服务器切换前已完成配置、MongoDB、上传文件和 Compose 文件备份。
 - 待人工 UAT：使用真实 SSO 账号检查登录、Portal 页面、知识中心读写权限、Draw.io 下载、企业图表展示和真实模型/MCP 调用。
+
+## 11. HTTP Artifacts 预览与本地 Sandpack（2026-09-26）
+
+- 需求边界：门户继续使用 HTTP，不修改 Caddy、NAT、OIDC 或公开端口；HTML Artifacts 不能依赖 CodeSandbox 公共预览服务。
+- HTML 类型 `text/html` 和 `application/vnd.code-html` 现在使用 `client/src/components/Artifacts/HtmlArtifactPreview.tsx` 的受限 `iframe srcDoc` 预览，沙箱只开启 `allow-scripts`，不授予 `allow-same-origin`、表单、弹窗或顶层导航权限。
+- HTML 预览绕过 Sandpack 的 Web Crypto/Service Worker 静态链路，因此适配当前 HTTP 入口；React、SVG、Markdown、Mermaid、Office 和其他 Sandpack 类型保持原有渲染路径。
+- Artifact 刷新按钮通过 `previewRevision` 重新挂载 HTML iframe，并继续调用 Sandpack client refresh；编辑器内容优先于原始 Artifact 内容。
+- `deployment/compose.sandpack.yml.example` 提供本地 bundler overlay，镜像为 `ghcr.io/librechat-ai/codesandbox-client/bundler:latest`。该服务只加入 LibreChat Compose 网络，不直接暴露公网；需要由现有反向代理提供浏览器可访问 URL，再设置 `SANDPACK_BUNDLER_URL`。
+- 反向代理本地 bundler 时需允许浏览器跨域访问，并透传 WebSocket/Worker 所需响应；Worker 脚本响应的 `Content-Type` 必须是 JavaScript MIME（如 `application/javascript`），否则 Sandpack 仍会在浏览器端启动失败。
+- `SANDPACK_BUNDLER_URL` 只影响需要 Sandpack bundling 的类型，不是 HTML HTTP 兼容预览的前置条件。`http://sandpack:80` 只能作为容器内部地址，不能直接交给浏览器。
+- 回滚：移除 HTML 路由、`HtmlArtifactPreview.tsx`、`previewRevision` 和本 overlay；恢复 `SandboxArtifactTabs` 对所有类型调用 `ArtifactPreview` 即可。生产上线前必须重建 rc4 定制镜像并完成真实 HTTP 浏览器 UAT，当前源码/测试通过不等于线上已切换。

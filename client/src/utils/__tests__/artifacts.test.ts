@@ -3,6 +3,7 @@ import type { ToolArtifactType } from '../artifacts';
 import {
   artifactRowKind,
   buildSandpackOptions,
+  isHtmlArtifactType,
   getArtifactDownloadFilename,
   getArtifactFilename,
   getDependencies,
@@ -18,6 +19,19 @@ import {
 } from '../artifacts';
 
 const TAILWIND_CDN = 'https://cdn.tailwindcss.com/3.4.17#tailwind.js';
+
+describe('HTTP-compatible HTML Artifact detection', () => {
+  it.each(['text/html', 'application/vnd.code-html'])('recognizes %s', (type) => {
+    expect(isHtmlArtifactType(type)).toBe(true);
+  });
+
+  it.each(['application/vnd.react', 'image/svg+xml', 'text/markdown', undefined])(
+    'does not route %s through the HTML preview',
+    (type) => {
+      expect(isHtmlArtifactType(type)).toBe(false);
+    },
+  );
+});
 
 describe('SVG artifact template mapping (#16087)', () => {
   /* Bare `<svg>` handed to the static template as `index.html` renders

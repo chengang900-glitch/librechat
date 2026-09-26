@@ -15,6 +15,7 @@ const SandboxArtifactTabs = lazy(() => import('./SandboxArtifactTabs'));
 interface ArtifactTabsProps {
   artifact: Artifact;
   previewRef: React.MutableRefObject<SandpackPreviewRef>;
+  previewRevision?: number;
   isSharedConvo?: boolean;
   onMermaidExportReady?: (data: ProcessedMermaidSvg | null) => void;
 }

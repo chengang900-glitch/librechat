@@ -323,6 +323,11 @@ export function getDependencies(type: string): Record<string, string> {
   return dependenciesMap[type] ?? standardDependencies;
 }
 
+/** HTML Artifacts use the HTTP-compatible iframe preview rather than Sandpack. */
+export function isHtmlArtifactType(type: string | null | undefined): boolean {
+  return type === 'text/html' || type === 'application/vnd.code-html';
+}
+
 export function getProps(type: string): Partial<SandpackProviderProps> {
   return {
     customSetup: {

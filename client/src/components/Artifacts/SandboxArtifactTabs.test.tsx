@@ -12,6 +12,11 @@ interface PreviewProps {
 }
 
 const mockPreview = jest.fn((_props: PreviewProps) => null);
+const mockHtmlPreview = jest.fn(({ html, refreshKey }: { html: string; refreshKey: number }) => (
+  <div data-testid="html-preview" data-refresh-key={refreshKey}>
+    {html}
+  </div>
+));
 let mockCurrentCode: string | undefined;
 
 jest.mock('./ArtifactCodeEditor', () => ({
@@ -20,6 +25,10 @@ jest.mock('./ArtifactCodeEditor', () => ({
 
 jest.mock('./ArtifactPreview', () => ({
   ArtifactPreview: (props: PreviewProps) => mockPreview(props),
+}));
+
+jest.mock('./HtmlArtifactPreview', () => ({
+  HtmlArtifactPreview: (props: { html: string; refreshKey: number }) => mockHtmlPreview(props),
 }));
 
 jest.mock('~/Providers/EditorContext', () => ({
@@ -68,6 +77,7 @@ describe('SandboxArtifactTabs SVG preview', () => {
   beforeEach(() => {
     mockCurrentCode = undefined;
     mockPreview.mockClear();
+    mockHtmlPreview.mockClear();
   });
 
   /** An SVG preview renders a derived `index.html`, so an edit that only
@@ -122,9 +132,34 @@ describe('SandboxArtifactTabs SVG preview', () => {
       </Tabs.Root>,
     );
 
-    /* `ArtifactPreview` owns this swap; the tabs must not pre-empt it. */
-    const call = mockPreview.mock.calls.at(-1)?.[0];
-    expect(call?.files['index.html']).toBe('<p>original</p>');
-    expect(call?.currentCode).toBe('<p>edited</p>');
+    expect(mockPreview).not.toHaveBeenCalled();
+    expect(mockHtmlPreview).toHaveBeenLastCalledWith({
+      html: '<p>edited</p>',
+      refreshKey: 0,
+    });
+  });
+
+  it('renders HTML through the HTTP-compatible iframe and remounts on refresh', () => {
+    const htmlArtifact: Artifact = {
+      id: 'html-artifact-2',
+      type: 'application/vnd.code-html',
+      title: 'Page',
+      content: '<script>document.body.dataset.ready = "yes"</script>',
+      lastUpdateTime: 1,
+    };
+
+    const { rerender, getByTestId } = render(
+      <Tabs.Root value="preview">
+        <SandboxArtifactTabs artifact={htmlArtifact} previewRef={previewRef} previewRevision={0} />
+      </Tabs.Root>,
+    );
+
+    expect(getByTestId('html-preview')).toHaveAttribute('data-refresh-key', '0');
+    rerender(
+      <Tabs.Root value="preview">
+        <SandboxArtifactTabs artifact={htmlArtifact} previewRef={previewRef} previewRevision={1} />
+      </Tabs.Root>,
+    );
+    expect(getByTestId('html-preview')).toHaveAttribute('data-refresh-key', '1');
   });
 });

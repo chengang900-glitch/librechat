@@ -1,0 +1,21 @@
+# Merge this overlay with the same Compose project that runs LibreChat.
+# The service is intentionally not published directly to the Internet. Route a
+# browser-visible URL through the existing reverse proxy to sandpack:80 and set
+# SANDPACK_BUNDLER_URL to that URL in the LibreChat service environment.
+services:
+  sandpack:
+    image: ghcr.io/librechat-ai/codesandbox-client/bundler:latest
+    restart: unless-stopped
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - default
+
+networks:
+  default: {}
