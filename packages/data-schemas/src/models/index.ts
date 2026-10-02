@@ -1,8 +1,5 @@
 import { createAgentQueuedTurnModel, createAgentQueuedTurnSequenceModel } from './queuedTurn';
-import { createPortalKnowledgeFavoriteModel } from './portal/knowledgeFavorite';
-import { createPortalKnowledgeSessionModel } from './portal/knowledgeSession';
 import { createAgentTriggerLaneSequenceModel } from './triggerLaneSequence';
-import { createPortalKnowledgeRecentModel } from './portal/knowledgeRecent';
 import { createScheduleModel, createScheduleRunModel } from './schedule';
 import { getTenantIndexMigrationHint } from '~/migrations/tenantIndexes';
 import { createSkillSyncCredentialModel } from './skillSyncCredential';
@@ -97,9 +94,6 @@ export function createModels(mongoose: typeof import('mongoose')): {
   PortalGroup: ReturnType<typeof createPortalGroupModel>;
   PortalApp: ReturnType<typeof createPortalAppModel>;
   PortalFavorite: ReturnType<typeof createPortalFavoriteModel>;
-  PortalKnowledgeFavorite: ReturnType<typeof createPortalKnowledgeFavoriteModel>;
-  PortalKnowledgeRecent: ReturnType<typeof createPortalKnowledgeRecentModel>;
-  PortalKnowledgeSession: ReturnType<typeof createPortalKnowledgeSessionModel>;
   AgentTriggerDelivery: ReturnType<typeof createAgentTriggerDeliveryModel>;
   AgentTriggerLaneSequence: ReturnType<typeof createAgentTriggerLaneSequenceModel>;
   AgentTriggerUserPurge: ReturnType<typeof createAgentTriggerUserPurgeModel>;
@@ -152,9 +146,6 @@ export function createModels(mongoose: typeof import('mongoose')): {
     PortalGroup: createPortalGroupModel(mongoose),
     PortalApp: createPortalAppModel(mongoose),
     PortalFavorite: createPortalFavoriteModel(mongoose),
-    PortalKnowledgeFavorite: createPortalKnowledgeFavoriteModel(mongoose),
-    PortalKnowledgeRecent: createPortalKnowledgeRecentModel(mongoose),
-    PortalKnowledgeSession: createPortalKnowledgeSessionModel(mongoose),
     AgentTriggerDelivery: createAgentTriggerDeliveryModel(mongoose),
     AgentTriggerLaneSequence: createAgentTriggerLaneSequenceModel(mongoose),
     AgentTriggerUserPurge: createAgentTriggerUserPurgeModel(mongoose),

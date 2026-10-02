@@ -2,6 +2,19 @@
 
 > 用途：本文件是 LibreChat 升级时迁移企业门户定制的唯一入口。实施新定制后必须同步更新本文件，不得记录密码、Token、Cookie 或 `.env` 内容。
 
+## 当前知识中心方案（2026-10-02）
+
+- 当前代码基于 `v0.8.8-rc4`，分支为 `enterprise-ai/portal-v0.8.8-rc4`；下文旧基线和历次上线记录仅为历史记录。
+- `/portal/knowledge` 保留为知识中心入口，按线上 `portal.4-weknora-embed` 方案直接嵌入 `PORTAL_DOCUMENT_CENTER_URL` 指定的 WeKnora 页面。同源且不含凭据的 URL 使用 iframe，跨源配置使用外部链接。
+- 知识库、文档、Wiki、问答以及知识权限由 WeKnora 自身负责，不再在 LibreChat 内重复实现或判断 `knowledge-readers` / `knowledge-maintainers`。
+- 已移除旧知识中心定制页面、演示知识页面、`/api/portal/knowledge` BFF、客户端专用契约和收藏/最近访问/问答会话模型。此入口不再调用这些专用 API。
+- 应用中心、数据中心、原生 Agent 知识能力及 MCP 集成保持不变；旧 MongoDB 知识定制集合保留，不执行数据删除或迁移。
+- 部署参考 `deployment/compose.weknora-embed.yml.example`，无需旧知识 BFF 的 API Key。嵌入依赖已有同源反向代理和 WeKnora 的独立 OIDC/权限配置；不能仅凭 iframe `load` 事件断言 SSO 或知识操作验收成功。
+- 本版本仅更新 Git 源码；生产镜像、容器和数据库不在本次变更范围。
+- Git 定制版本标签：`enterprise-ai-weknora-embed-only-20261002`，保留上游 `v0.8.8-rc4` 软件版本号。
+- 本地验证：共享包和生产前端构建通过；四个变更工作区 `tsc --noEmit` 通过；嵌入页、顶栏、启动配置、应用请求、URL 校验和应用目录/收藏共 24 项针对性测试通过。
+- 验证边界：通用 `/api/config` 套件原有 5 项能力调用次数断言失败，已用上一版路由复现相同失败。本次未处理无关断言；Lighthouse 在注册前置步骤等待 `Sign up` 超时，未生成性能验收结果；未执行生产 SSO/WeKnora 操作验收。
+
 ## 1. 基线与边界
 
 - 上游基线：LibreChat `v0.8.7`，提交 `9e74cc0e57b395926122bd4062c1fcedc48ed465`。

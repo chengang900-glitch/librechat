@@ -70,6 +70,44 @@ const mockUser = {
   tenantId: undefined,
 };
 
+describe('WeKnora Portal configuration', () => {
+  const portalEnvKeys = ['PORTAL_ENABLED', 'PORTAL_DATA_CENTER_URL', 'PORTAL_DOCUMENT_CENTER_URL'];
+  let previousEnv;
+
+  beforeEach(() => {
+    previousEnv = Object.fromEntries(portalEnvKeys.map((key) => [key, process.env[key]]));
+    process.env.PORTAL_ENABLED = 'true';
+    process.env.PORTAL_DATA_CENTER_URL = 'https://portal.example.com/data/';
+    process.env.PORTAL_DOCUMENT_CENTER_URL = 'https://portal.example.com/weknora/';
+    mockGetAppConfig.mockResolvedValue(baseAppConfig);
+    mockHasCapability.mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    for (const key of portalEnvKeys) {
+      if (previousEnv[key] === undefined) delete process.env[key];
+      else process.env[key] = previousEnv[key];
+    }
+  });
+
+  it('preserves the WeKnora URL without legacy knowledge permission flags', async () => {
+    const response = await request(createApp(mockUser)).get('/api/config');
+    expect(response.status).toBe(200);
+    expect(response.body.portal.navigation.documentCenter).toMatchObject({
+      label: '知识中心',
+      url: 'https://portal.example.com/weknora/',
+    });
+    expect(response.body.portal).not.toHaveProperty('canAccessKnowledge');
+    expect(response.body.portal).not.toHaveProperty('canManageKnowledge');
+  });
+
+  it('does not disclose Portal URLs to unauthenticated callers', async () => {
+    const response = await request(createApp(null)).get('/api/config');
+    expect(response.status).toBe(200);
+    expect(response.body).not.toHaveProperty('portal');
+  });
+});
+
 afterEach(() => {
   jest.resetAllMocks();
   mockResolveBuildInfo.mockReturnValue({

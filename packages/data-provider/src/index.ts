@@ -61,15 +61,6 @@ export {
 } from './api-endpoints';
 export { default as request } from './request';
 export { dataService };
-export type {
-  PortalKnowledgeAnswer,
-  PortalKnowledgeAuditEntry,
-  PortalKnowledgeAuditPage,
-  PortalKnowledgeFavorite,
-  PortalKnowledgeMessage,
-  PortalKnowledgeRecent,
-  PortalKnowledgeReference,
-} from './data-service';
 import * as dataService from './data-service';
 /* provider identity */
 export * from './providers';

@@ -1,16 +1,6 @@
 import mongoose, { Types } from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import type {
-  IPortalApp,
-  IPortalFavorite,
-  IPortalGroup,
-  IPortalKnowledgeFavorite,
-  IPortalKnowledgeRecent,
-  IPortalKnowledgeSession,
-} from '~/types';
-import portalKnowledgeFavoriteSchema from '~/schema/portal/knowledgeFavorite';
-import portalKnowledgeSessionSchema from '~/schema/portal/knowledgeSession';
-import portalKnowledgeRecentSchema from '~/schema/portal/knowledgeRecent';
+import type { IPortalApp, IPortalFavorite, IPortalGroup } from '~/types';
 import portalFavoriteSchema from '~/schema/portal/favorite';
 import portalGroupSchema from '~/schema/portal/group';
 import portalAppSchema from '~/schema/portal/app';
@@ -33,18 +23,6 @@ beforeAll(async () => {
   if (!mongoose.models.PortalFavorite) {
     mongoose.model<IPortalFavorite>('PortalFavorite', portalFavoriteSchema);
   }
-  if (!mongoose.models.PortalKnowledgeFavorite) {
-    mongoose.model<IPortalKnowledgeFavorite>(
-      'PortalKnowledgeFavorite',
-      portalKnowledgeFavoriteSchema,
-    );
-  }
-  if (!mongoose.models.PortalKnowledgeRecent) {
-    mongoose.model<IPortalKnowledgeRecent>('PortalKnowledgeRecent', portalKnowledgeRecentSchema);
-  }
-  if (!mongoose.models.PortalKnowledgeSession) {
-    mongoose.model<IPortalKnowledgeSession>('PortalKnowledgeSession', portalKnowledgeSessionSchema);
-  }
   methods = createPortalMethods(mongoose);
 });
 
@@ -58,9 +36,6 @@ beforeEach(async () => {
     mongoose.models.PortalGroup.deleteMany({}),
     mongoose.models.PortalApp.deleteMany({}),
     mongoose.models.PortalFavorite.deleteMany({}),
-    mongoose.models.PortalKnowledgeFavorite.deleteMany({}),
-    mongoose.models.PortalKnowledgeRecent.deleteMany({}),
-    mongoose.models.PortalKnowledgeSession.deleteMany({}),
   ]);
 });
 
@@ -135,26 +110,5 @@ describe('portal data methods', () => {
       code: 'PORTAL_DUPLICATE_NAME',
       status: 409,
     });
-  });
-
-  it('keeps knowledge sessions isolated to their owner and knowledge base', async () => {
-    const ownerId = new Types.ObjectId().toString();
-    const otherId = new Types.ObjectId().toString();
-    await methods.createPortalKnowledgeSession({
-      userId: ownerId,
-      portalSessionId: 'portal-session',
-      providerSessionId: 'weknora-session',
-      knowledgeBaseId: 'company-products',
-    });
-
-    await expect(
-      methods.getPortalKnowledgeSession(otherId, 'company-products', 'portal-session'),
-    ).resolves.toBeNull();
-    await expect(
-      methods.getPortalKnowledgeSession(ownerId, 'another-base', 'portal-session'),
-    ).resolves.toBeNull();
-    await expect(
-      methods.getPortalKnowledgeSession(ownerId, 'company-products', 'portal-session'),
-    ).resolves.toMatchObject({ providerSessionId: 'weknora-session' });
   });
 });

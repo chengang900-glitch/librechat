@@ -26,8 +26,6 @@ export type TPortalStartupConfig = {
   enabled: boolean;
   brandName: string;
   canManage: boolean;
-  canAccessKnowledge: boolean;
-  canManageKnowledge: boolean;
   navigation: {
     assistant: { label: string; path: '/c/new' };
     dataCenter: { label: string; url: string; mode: PortalOpenMode };

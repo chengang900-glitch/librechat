@@ -1,0 +1,6 @@
+# Set the public same-origin URL, e.g. https://portal.example.com/weknora/.
+# The reverse proxy and WeKnora OIDC configuration are managed independently.
+services:
+  librechat:
+    environment:
+      PORTAL_DOCUMENT_CENTER_URL: ${PORTAL_DOCUMENT_CENTER_URL:?Set the public WeKnora URL}

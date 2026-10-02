@@ -455,7 +455,6 @@ const startServer = async () => {
   app.use('/api/mcp', routes.mcp);
   app.use('/api/rum', routes.rum);
   app.use('/api/portal', routes.portal);
-  app.use('/api/portal/knowledge', routes.portalKnowledge);
 
   app.use('/metrics', metricsRouter);
 

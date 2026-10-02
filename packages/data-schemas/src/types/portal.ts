@@ -35,38 +35,3 @@ export interface IPortalFavorite extends Document {
   appId: Types.ObjectId;
   createdAt: Date;
 }
-
-export type PortalKnowledgeTargetType = 'knowledge_base' | 'document';
-
-export interface IPortalKnowledgeFavorite extends Document {
-  _id: Types.ObjectId;
-  userId: Types.ObjectId;
-  targetType: PortalKnowledgeTargetType;
-  targetId: string;
-  knowledgeBaseId: string;
-  titleSnapshot: string;
-  createdAt: Date;
-}
-
-export interface IPortalKnowledgeRecent extends Document {
-  _id: Types.ObjectId;
-  userId: Types.ObjectId;
-  targetType: PortalKnowledgeTargetType;
-  targetId: string;
-  knowledgeBaseId: string;
-  titleSnapshot: string;
-  lastUsedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface IPortalKnowledgeSession extends Document {
-  _id: Types.ObjectId;
-  userId: Types.ObjectId;
-  portalSessionId: string;
-  providerSessionId: string;
-  knowledgeBaseId: string;
-  lastUsedAt: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}

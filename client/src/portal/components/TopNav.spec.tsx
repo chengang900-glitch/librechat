@@ -14,8 +14,6 @@ const config: TPortalStartupConfig = {
   enabled: true,
   brandName: '企业AI中台',
   canManage: false,
-  canAccessKnowledge: false,
-  canManageKnowledge: false,
   navigation: {
     assistant: { label: 'AI工作台', path: '/c/new' },
     dataCenter: {

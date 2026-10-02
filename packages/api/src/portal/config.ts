@@ -28,7 +28,6 @@ const validatePortalUrl = (
 export function buildPortalStartupConfig(
   env: NodeJS.ProcessEnv = process.env,
   canManage = false,
-  knowledgeAccess: { canRead?: boolean; canManage?: boolean } = {},
 ): TPortalStartupConfig | undefined {
   if (!isEnabled(env.PORTAL_ENABLED)) {
     return undefined;
@@ -50,8 +49,6 @@ export function buildPortalStartupConfig(
     enabled: true,
     brandName: env.APP_TITLE?.trim() || '企业AI中台',
     canManage,
-    canAccessKnowledge: knowledgeAccess.canRead === true,
-    canManageKnowledge: knowledgeAccess.canManage === true,
     navigation: {
       assistant: { label: 'AI工作台', path: '/c/new' },
       dataCenter: { label: '数据中心', url: dataCenterUrl, mode: 'new_tab' },

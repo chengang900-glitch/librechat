@@ -14,12 +14,10 @@ describe('buildPortalStartupConfig', () => {
   });
 
   it('builds the four-entry navigation for an authenticated user', () => {
-    expect(buildPortalStartupConfig(baseEnv, true, { canRead: true, canManage: true })).toEqual({
+    expect(buildPortalStartupConfig(baseEnv, true)).toEqual({
       enabled: true,
       brandName: '企业AI中台',
       canManage: true,
-      canAccessKnowledge: true,
-      canManageKnowledge: true,
       navigation: {
         assistant: { label: 'AI工作台', path: '/c/new' },
         dataCenter: {

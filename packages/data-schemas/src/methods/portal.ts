@@ -11,19 +11,10 @@ import type {
   UpdatePortalGroupInput,
 } from 'librechat-data-provider';
 import type { Model, Types } from 'mongoose';
-import type {
-  IPortalApp,
-  IPortalFavorite,
-  IPortalGroup,
-  IPortalKnowledgeFavorite,
-  IPortalKnowledgeRecent,
-  IPortalKnowledgeSession,
-  PortalKnowledgeTargetType,
-} from '~/types';
+import type { IPortalApp, IPortalFavorite, IPortalGroup } from '~/types';
 
 const MAX_GROUPS = 100;
 const MAX_APPS = 500;
-const MAX_KNOWLEDGE_RECENTS = 50;
 
 export class PortalDataError extends Error {
   constructor(
@@ -106,99 +97,12 @@ export interface PortalMethods {
   findLaunchablePortalApp: (id: string) => Promise<TPortalAdminApp | null>;
   addPortalFavorite: (userId: string, appId: string) => Promise<void>;
   removePortalFavorite: (userId: string, appId: string) => Promise<void>;
-  listPortalKnowledgeFavorites: (
-    userId: string,
-    knowledgeBaseId: string,
-  ) => Promise<PortalKnowledgeFavoriteRecord[]>;
-  addPortalKnowledgeFavorite: (input: PortalKnowledgeFavoriteInput) => Promise<void>;
-  removePortalKnowledgeFavorite: (
-    userId: string,
-    knowledgeBaseId: string,
-    targetType: PortalKnowledgeTargetType,
-    targetId: string,
-  ) => Promise<void>;
-  recordPortalKnowledgeRecent: (input: PortalKnowledgeRecentInput) => Promise<void>;
-  listPortalKnowledgeRecents: (
-    userId: string,
-    knowledgeBaseId: string,
-  ) => Promise<PortalKnowledgeRecentRecord[]>;
-  createPortalKnowledgeSession: (
-    input: PortalKnowledgeSessionInput,
-  ) => Promise<PortalKnowledgeSessionRecord>;
-  getPortalKnowledgeSession: (
-    userId: string,
-    knowledgeBaseId: string,
-    portalSessionId: string,
-  ) => Promise<PortalKnowledgeSessionRecord | null>;
-  touchPortalKnowledgeSession: (
-    userId: string,
-    knowledgeBaseId: string,
-    portalSessionId: string,
-  ) => Promise<void>;
-  deletePortalKnowledgeSession: (
-    userId: string,
-    knowledgeBaseId: string,
-    portalSessionId: string,
-  ) => Promise<void>;
-}
-
-export interface PortalKnowledgeFavoriteInput {
-  userId: string;
-  targetType: PortalKnowledgeTargetType;
-  targetId: string;
-  knowledgeBaseId: string;
-  titleSnapshot?: string;
-}
-
-export interface PortalKnowledgeRecentInput {
-  userId: string;
-  targetType: PortalKnowledgeTargetType;
-  targetId: string;
-  knowledgeBaseId: string;
-  titleSnapshot?: string;
-}
-
-export interface PortalKnowledgeFavoriteRecord {
-  targetType: PortalKnowledgeTargetType;
-  targetId: string;
-  knowledgeBaseId: string;
-  titleSnapshot: string;
-  createdAt: string;
-}
-
-export interface PortalKnowledgeRecentRecord {
-  targetType: PortalKnowledgeTargetType;
-  targetId: string;
-  knowledgeBaseId: string;
-  titleSnapshot: string;
-  lastUsedAt: string;
-}
-
-export interface PortalKnowledgeSessionInput {
-  userId: string;
-  portalSessionId: string;
-  providerSessionId: string;
-  knowledgeBaseId: string;
-}
-
-export interface PortalKnowledgeSessionRecord {
-  portalSessionId: string;
-  providerSessionId: string;
-  knowledgeBaseId: string;
-  lastUsedAt: string;
-  createdAt: string;
 }
 
 export function createPortalMethods(mongoose: typeof import('mongoose')): PortalMethods {
   const groupModel = () => mongoose.models.PortalGroup as Model<IPortalGroup>;
   const appModel = () => mongoose.models.PortalApp as Model<IPortalApp>;
   const favoriteModel = () => mongoose.models.PortalFavorite as Model<IPortalFavorite>;
-  const knowledgeFavoriteModel = () =>
-    mongoose.models.PortalKnowledgeFavorite as Model<IPortalKnowledgeFavorite>;
-  const knowledgeRecentModel = () =>
-    mongoose.models.PortalKnowledgeRecent as Model<IPortalKnowledgeRecent>;
-  const knowledgeSessionModel = () =>
-    mongoose.models.PortalKnowledgeSession as Model<IPortalKnowledgeSession>;
   const objectId = (value: string, field: string): Types.ObjectId => {
     if (!mongoose.Types.ObjectId.isValid(value)) {
       throw new PortalDataError('PORTAL_INVALID_ID', 400, `${field} is invalid`);
@@ -385,225 +289,6 @@ export function createPortalMethods(mongoose: typeof import('mongoose')): Portal
     });
   }
 
-  const knowledgeTarget = (targetType: PortalKnowledgeTargetType, targetId: string) => {
-    if (!['knowledge_base', 'document'].includes(targetType)) {
-      throw new PortalDataError('PORTAL_KNOWLEDGE_TARGET_TYPE', 400, 'Invalid knowledge target');
-    }
-    const normalizedId = targetId.trim();
-    if (!normalizedId || normalizedId.length > 200) {
-      throw new PortalDataError('PORTAL_KNOWLEDGE_TARGET_ID', 400, 'Invalid knowledge target id');
-    }
-    return normalizedId;
-  };
-
-  const knowledgeSessionId = (value: string, field: string) => {
-    const normalized = value.trim();
-    if (!normalized || normalized.length > 200) {
-      throw new PortalDataError('PORTAL_KNOWLEDGE_SESSION_ID', 400, `${field} is invalid`);
-    }
-    return normalized;
-  };
-
-  const mapKnowledgeFavorite = (
-    item: Pick<
-      IPortalKnowledgeFavorite,
-      'targetType' | 'targetId' | 'knowledgeBaseId' | 'titleSnapshot' | 'createdAt'
-    >,
-  ): PortalKnowledgeFavoriteRecord => ({
-    targetType: item.targetType,
-    targetId: item.targetId,
-    knowledgeBaseId: item.knowledgeBaseId,
-    titleSnapshot: item.titleSnapshot,
-    createdAt: item.createdAt.toISOString(),
-  });
-
-  const mapKnowledgeRecent = (
-    item: Pick<
-      IPortalKnowledgeRecent,
-      'targetType' | 'targetId' | 'knowledgeBaseId' | 'titleSnapshot' | 'lastUsedAt'
-    >,
-  ): PortalKnowledgeRecentRecord => ({
-    targetType: item.targetType,
-    targetId: item.targetId,
-    knowledgeBaseId: item.knowledgeBaseId,
-    titleSnapshot: item.titleSnapshot,
-    lastUsedAt: item.lastUsedAt.toISOString(),
-  });
-
-  const mapKnowledgeSession = (
-    item: Pick<
-      IPortalKnowledgeSession,
-      'portalSessionId' | 'providerSessionId' | 'knowledgeBaseId' | 'lastUsedAt' | 'createdAt'
-    >,
-  ): PortalKnowledgeSessionRecord => ({
-    portalSessionId: item.portalSessionId,
-    providerSessionId: item.providerSessionId,
-    knowledgeBaseId: item.knowledgeBaseId,
-    lastUsedAt: item.lastUsedAt.toISOString(),
-    createdAt: item.createdAt.toISOString(),
-  });
-
-  async function listPortalKnowledgeFavorites(
-    userId: string,
-    knowledgeBaseId: string,
-  ): Promise<PortalKnowledgeFavoriteRecord[]> {
-    const userObjectId = objectId(userId, 'userId');
-    return (
-      await knowledgeFavoriteModel()
-        .find({ userId: userObjectId, knowledgeBaseId })
-        .sort({ createdAt: -1 })
-        .lean()
-    ).map(mapKnowledgeFavorite);
-  }
-
-  async function addPortalKnowledgeFavorite(input: PortalKnowledgeFavoriteInput): Promise<void> {
-    const userObjectId = objectId(input.userId, 'userId');
-    const targetId = knowledgeTarget(input.targetType, input.targetId);
-    const knowledgeBaseId = input.knowledgeBaseId.trim();
-    if (!knowledgeBaseId || knowledgeBaseId.length > 200) {
-      throw new PortalDataError('PORTAL_KNOWLEDGE_BASE_ID', 400, 'Invalid knowledge base id');
-    }
-    try {
-      await knowledgeFavoriteModel().updateOne(
-        { userId: userObjectId, targetType: input.targetType, targetId },
-        {
-          $setOnInsert: {
-            userId: userObjectId,
-            targetType: input.targetType,
-            targetId,
-            knowledgeBaseId,
-            titleSnapshot: String(input.titleSnapshot || '').slice(0, 512),
-          },
-        },
-        { upsert: true },
-      );
-    } catch (error) {
-      return translateError(error);
-    }
-  }
-
-  async function removePortalKnowledgeFavorite(
-    userId: string,
-    knowledgeBaseId: string,
-    targetType: PortalKnowledgeTargetType,
-    targetId: string,
-  ): Promise<void> {
-    const userObjectId = objectId(userId, 'userId');
-    await knowledgeFavoriteModel().deleteOne({
-      userId: userObjectId,
-      knowledgeBaseId,
-      targetType,
-      targetId: knowledgeTarget(targetType, targetId),
-    });
-  }
-
-  async function recordPortalKnowledgeRecent(input: PortalKnowledgeRecentInput): Promise<void> {
-    const userObjectId = objectId(input.userId, 'userId');
-    const targetId = knowledgeTarget(input.targetType, input.targetId);
-    const knowledgeBaseId = input.knowledgeBaseId.trim();
-    if (!knowledgeBaseId || knowledgeBaseId.length > 200) {
-      throw new PortalDataError('PORTAL_KNOWLEDGE_BASE_ID', 400, 'Invalid knowledge base id');
-    }
-    await knowledgeRecentModel().updateOne(
-      { userId: userObjectId, targetType: input.targetType, targetId },
-      {
-        $set: {
-          knowledgeBaseId,
-          titleSnapshot: String(input.titleSnapshot || '').slice(0, 512),
-          lastUsedAt: new Date(),
-        },
-        $setOnInsert: { userId: userObjectId, targetType: input.targetType, targetId },
-      },
-      { upsert: true },
-    );
-    const stale = await knowledgeRecentModel()
-      .find({ userId: userObjectId, knowledgeBaseId })
-      .sort({ lastUsedAt: -1 })
-      .skip(MAX_KNOWLEDGE_RECENTS)
-      .select({ _id: 1 })
-      .lean();
-    if (stale.length > 0) {
-      await knowledgeRecentModel().deleteMany({ _id: { $in: stale.map((item) => item._id) } });
-    }
-  }
-
-  async function listPortalKnowledgeRecents(
-    userId: string,
-    knowledgeBaseId: string,
-  ): Promise<PortalKnowledgeRecentRecord[]> {
-    const userObjectId = objectId(userId, 'userId');
-    return (
-      await knowledgeRecentModel()
-        .find({ userId: userObjectId, knowledgeBaseId })
-        .sort({ lastUsedAt: -1 })
-        .limit(MAX_KNOWLEDGE_RECENTS)
-        .lean()
-    ).map(mapKnowledgeRecent);
-  }
-
-  async function createPortalKnowledgeSession(
-    input: PortalKnowledgeSessionInput,
-  ): Promise<PortalKnowledgeSessionRecord> {
-    const userId = objectId(input.userId, 'userId');
-    const knowledgeBaseId = knowledgeSessionId(input.knowledgeBaseId, 'knowledgeBaseId');
-    const portalSessionId = knowledgeSessionId(input.portalSessionId, 'portalSessionId');
-    const providerSessionId = knowledgeSessionId(input.providerSessionId, 'providerSessionId');
-    try {
-      const session = await knowledgeSessionModel().create({
-        userId,
-        knowledgeBaseId,
-        portalSessionId,
-        providerSessionId,
-        lastUsedAt: new Date(),
-      });
-      return mapKnowledgeSession(session);
-    } catch (error) {
-      return translateError(error);
-    }
-  }
-
-  async function getPortalKnowledgeSession(
-    userId: string,
-    knowledgeBaseId: string,
-    portalSessionId: string,
-  ): Promise<PortalKnowledgeSessionRecord | null> {
-    const session = await knowledgeSessionModel()
-      .findOne({
-        userId: objectId(userId, 'userId'),
-        knowledgeBaseId: knowledgeSessionId(knowledgeBaseId, 'knowledgeBaseId'),
-        portalSessionId: knowledgeSessionId(portalSessionId, 'portalSessionId'),
-      })
-      .lean();
-    return session ? mapKnowledgeSession(session) : null;
-  }
-
-  async function touchPortalKnowledgeSession(
-    userId: string,
-    knowledgeBaseId: string,
-    portalSessionId: string,
-  ): Promise<void> {
-    await knowledgeSessionModel().updateOne(
-      {
-        userId: objectId(userId, 'userId'),
-        knowledgeBaseId: knowledgeSessionId(knowledgeBaseId, 'knowledgeBaseId'),
-        portalSessionId: knowledgeSessionId(portalSessionId, 'portalSessionId'),
-      },
-      { $set: { lastUsedAt: new Date() } },
-    );
-  }
-
-  async function deletePortalKnowledgeSession(
-    userId: string,
-    knowledgeBaseId: string,
-    portalSessionId: string,
-  ): Promise<void> {
-    await knowledgeSessionModel().deleteOne({
-      userId: objectId(userId, 'userId'),
-      knowledgeBaseId: knowledgeSessionId(knowledgeBaseId, 'knowledgeBaseId'),
-      portalSessionId: knowledgeSessionId(portalSessionId, 'portalSessionId'),
-    });
-  }
-
   return {
     listEnabledPortalCatalog,
     listAdminPortalCatalog,
@@ -616,14 +301,5 @@ export function createPortalMethods(mongoose: typeof import('mongoose')): Portal
     findLaunchablePortalApp,
     addPortalFavorite,
     removePortalFavorite,
-    listPortalKnowledgeFavorites,
-    addPortalKnowledgeFavorite,
-    removePortalKnowledgeFavorite,
-    recordPortalKnowledgeRecent,
-    listPortalKnowledgeRecents,
-    createPortalKnowledgeSession,
-    getPortalKnowledgeSession,
-    touchPortalKnowledgeSession,
-    deletePortalKnowledgeSession,
   };
 }

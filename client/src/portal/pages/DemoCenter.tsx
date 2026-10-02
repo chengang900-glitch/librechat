@@ -1,42 +1,26 @@
 /* eslint-disable i18next/no-literal-string -- This fixed Chinese dashboard is explicitly demonstration content. */
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import {
   AlertTriangle,
   BarChart3,
-  BookOpen,
-  Boxes,
   ChevronDown,
-  ChevronRight,
   CircleDollarSign,
-  Clock3,
   Download,
   Factory,
-  FileArchive,
-  FileImage,
-  FileSpreadsheet,
-  FileText,
-  Filter,
-  Folder,
   Gauge,
-  Grid2X2,
-  List,
-  MoreHorizontal,
   PackageCheck,
   RefreshCw,
-  Search,
   ShieldCheck,
-  Star,
   Target,
   TrendingDown,
   TrendingUp,
   Truck,
-  Upload,
   Users,
 } from 'lucide-react';
 import { useGetStartupConfig } from '~/data-provider';
 
-type CenterKind = 'data' | 'knowledge';
+type CenterKind = 'data';
 
 const DATA_SECTIONS = [
   { name: '经营驾驶舱', icon: Target, children: ['核心指标', '预警中心', '目标达成'] },
@@ -101,72 +85,6 @@ const ALERTS = [
   ['库存周转天数', '供应链', '47 天', '≤ 42 天', '+5 天', '李国栋'],
   ['应收账款 DSO', '财务', '62 天', '≤ 55 天', '+7 天', '张予彤'],
   ['毛利率', '财务', '23.8%', '≥ 25.5%', '-1.7pt', '张三'],
-];
-
-const FOLDERS = [
-  { name: '最近使用', icon: Clock3 },
-  { name: '我的收藏', icon: Star },
-  { name: '公司文档库', icon: Folder, children: ['制度与流程', '战略规划', '财务与审计'] },
-  { name: '部门文档', icon: Folder, children: ['研发中心', '供应链中心', '营销中心'] },
-  { name: '项目文档', icon: Folder, children: ['P-2026 数字化工厂', 'P-2025 降本专项'] },
-  { name: '个人文档', icon: Folder },
-];
-
-const FILES = [
-  {
-    name: '费用报销管理制度（2026 修订版）',
-    type: 'Word',
-    size: '486 KB',
-    owner: '王莉',
-    date: '08-28',
-    icon: FileText,
-    tag: '已发布',
-  },
-  {
-    name: '采购管理办法与审批权限矩阵',
-    type: 'Word',
-    size: '312 KB',
-    owner: '刘畅',
-    date: '08-26',
-    icon: FileText,
-    tag: '受控',
-  },
-  {
-    name: '集团组织架构与职责说明书',
-    type: 'PDF',
-    size: '2.4 MB',
-    owner: '张予彤',
-    date: '08-25',
-    icon: FileArchive,
-    tag: '公开',
-  },
-  {
-    name: '2026 年度经营目标分解表',
-    type: 'Excel',
-    size: '1.1 MB',
-    owner: '张三',
-    date: '08-24',
-    icon: FileSpreadsheet,
-    tag: '机密',
-  },
-  {
-    name: '供应商准入评价标准 V4.2',
-    type: 'Word',
-    size: '268 KB',
-    owner: '李国栋',
-    date: '08-22',
-    icon: FileText,
-    tag: '受控',
-  },
-  {
-    name: '数字化工厂总体蓝图',
-    type: '图片',
-    size: '8.7 MB',
-    owner: '赵鹏',
-    date: '08-20',
-    icon: FileImage,
-    tag: '项目',
-  },
 ];
 
 function DemoBadge() {
@@ -426,252 +344,9 @@ function DataCenter() {
   );
 }
 
-function KnowledgeCenter() {
-  const [folder, setFolder] = useState('制度与流程');
-  const [search, setSearch] = useState('');
-  const [grid, setGrid] = useState(false);
-  const filtered = useMemo(
-    () => FILES.filter((file) => file.name.includes(search.trim())),
-    [search],
-  );
-  return (
-    <div className="flex h-full min-h-0 bg-surface-primary">
-      <aside className="hidden w-64 shrink-0 overflow-y-auto border-r border-border-light bg-surface-secondary p-3 dark:border-border-medium md:block">
-        <button
-          type="button"
-          className="mb-4 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          <Upload className="h-4 w-4" />
-          上传文档
-        </button>
-        <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-[0.14em] text-text-secondary">
-          知识目录
-        </p>
-        {FOLDERS.map((item) => {
-          const Icon = item.icon;
-          const selected = item.name === folder;
-          return (
-            <div key={item.name} className="mb-1">
-              <button
-                type="button"
-                onClick={() => setFolder(item.name)}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${selected ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'text-text-primary hover:bg-surface-tertiary'}`}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="flex-1">{item.name}</span>
-                {item.children && <ChevronDown className="h-3.5 w-3.5 text-text-secondary" />}
-              </button>
-              {item.children?.map((child) => (
-                <button
-                  type="button"
-                  key={child}
-                  onClick={() => setFolder(child)}
-                  className={`ml-6 block w-[calc(100%-1.5rem)] rounded-lg px-3 py-1.5 text-left text-xs ${folder === child ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'text-text-secondary hover:bg-surface-tertiary hover:text-text-primary'}`}
-                >
-                  {child}
-                </button>
-              ))}
-            </div>
-          );
-        })}
-      </aside>
-      <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <div className="mx-auto max-w-[1480px]">
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="mb-2 flex items-center gap-3">
-                <DemoBadge />
-                <span className="text-xs text-text-secondary">知识中心功能原型</span>
-              </div>
-              <h1 className="text-2xl font-semibold tracking-tight text-text-primary">{folder}</h1>
-              <p className="mt-1 text-sm text-text-secondary">
-                统一管理企业文档、项目材料与制度知识
-              </p>
-            </div>
-            <label className="relative block w-full sm:w-80">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-text-secondary" />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="搜索文档名称"
-                className="h-10 w-full rounded-xl border border-border-medium bg-surface-primary pl-9 pr-3 text-sm text-text-primary outline-none focus:border-blue-500"
-              />
-            </label>
-          </div>
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
-            <section className="min-w-0 overflow-hidden rounded-2xl border border-border-light bg-surface-primary shadow-sm dark:border-border-medium">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-light px-4 py-3 dark:border-border-medium">
-                <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <BookOpen className="h-4 w-4 text-blue-600" />
-                  <span>公司文档库</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                  <strong className="text-text-primary">{folder}</strong>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    className="rounded-lg p-2 text-text-secondary hover:bg-surface-secondary"
-                    aria-label="筛选"
-                  >
-                    <Filter className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGrid(false)}
-                    className={`rounded-lg p-2 ${!grid ? 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'text-text-secondary hover:bg-surface-secondary'}`}
-                    aria-label="列表视图"
-                  >
-                    <List className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGrid(true)}
-                    className={`rounded-lg p-2 ${grid ? 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'text-text-secondary hover:bg-surface-secondary'}`}
-                    aria-label="网格视图"
-                  >
-                    <Grid2X2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-              {grid ? (
-                <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {filtered.map((file) => {
-                    const Icon = file.icon;
-                    return (
-                      <article
-                        key={file.name}
-                        className="rounded-xl border border-border-light p-4 transition hover:border-blue-300 hover:shadow-sm dark:border-border-medium"
-                      >
-                        <div className="flex items-start justify-between">
-                          <span className="rounded-xl bg-blue-50 p-3 text-blue-600 dark:bg-blue-950 dark:text-blue-300">
-                            <Icon className="h-6 w-6" />
-                          </span>
-                          <MoreHorizontal className="h-4 w-4 text-text-secondary" />
-                        </div>
-                        <h3 className="mt-4 line-clamp-2 text-sm font-medium text-text-primary">
-                          {file.name}
-                        </h3>
-                        <p className="mt-2 text-xs text-text-secondary">
-                          {file.type} · {file.size}
-                        </p>
-                        <div className="mt-4 flex justify-between text-xs text-text-secondary">
-                          <span>{file.owner}</span>
-                          <span>{file.date}</span>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[720px] text-left text-sm">
-                    <thead className="bg-surface-secondary text-xs text-text-secondary">
-                      <tr>
-                        {['名称', '类型', '大小', '所有者', '更新时间', '标签', ''].map((h) => (
-                          <th key={h} className="px-4 py-3 font-medium">
-                            {h}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map((file) => {
-                        const Icon = file.icon;
-                        return (
-                          <tr
-                            key={file.name}
-                            className="border-t border-border-light hover:bg-surface-secondary dark:border-border-medium"
-                          >
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-3">
-                                <span className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-950 dark:text-blue-300">
-                                  <Icon className="h-4 w-4" />
-                                </span>
-                                <span className="font-medium text-text-primary">{file.name}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-text-secondary">{file.type}</td>
-                            <td className="px-4 py-3 text-text-secondary">{file.size}</td>
-                            <td className="px-4 py-3 text-text-secondary">{file.owner}</td>
-                            <td className="px-4 py-3 text-text-secondary">{file.date}</td>
-                            <td className="px-4 py-3">
-                              <span className="rounded-full bg-surface-tertiary px-2 py-1 text-xs text-text-secondary">
-                                {file.tag}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <MoreHorizontal className="h-4 w-4 text-text-secondary" />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              {filtered.length === 0 && (
-                <div className="p-12 text-center text-sm text-text-secondary">
-                  未找到匹配的演示文档
-                </div>
-              )}
-            </section>
-            <aside className="space-y-4">
-              <article className="rounded-2xl border border-border-light bg-surface-primary p-5 shadow-sm dark:border-border-medium">
-                <div className="flex items-center gap-2">
-                  <Boxes className="h-5 w-5 text-blue-600" />
-                  <h2 className="font-semibold text-text-primary">知识库概览</h2>
-                </div>
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  {[
-                    ['文档', '286'],
-                    ['文件夹', '34'],
-                    ['本月新增', '18'],
-                    ['已索引', '94%'],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded-xl bg-surface-secondary p-3">
-                      <strong className="block text-xl font-semibold text-text-primary">
-                        {value}
-                      </strong>
-                      <span className="text-xs text-text-secondary">{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </article>
-              <article className="rounded-2xl border border-border-light bg-surface-primary p-5 shadow-sm dark:border-border-medium">
-                <h2 className="font-semibold text-text-primary">热门文档</h2>
-                <div className="mt-4 space-y-4">
-                  {FILES.slice(0, 4).map((file, index) => (
-                    <button
-                      type="button"
-                      key={file.name}
-                      className="flex w-full items-start gap-3 text-left"
-                    >
-                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue-50 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                        {index + 1}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium text-text-primary">
-                          {file.name}
-                        </span>
-                        <span className="mt-0.5 block text-xs text-text-secondary">
-                          {file.owner} · {file.date}
-                        </span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </article>
-            </aside>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-export default function PortalDemoCenter({ kind }: { kind: CenterKind }) {
+export default function PortalDemoCenter(_props: { kind: CenterKind }) {
   const configQuery = useGetStartupConfig();
   if (configQuery.isLoading) return null;
   if (!configQuery.data?.portal?.enabled) return <Navigate to="/c/new" replace />;
-  return kind === 'data' ? <DataCenter /> : <KnowledgeCenter />;
+  return <DataCenter />;
 }

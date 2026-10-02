@@ -22,10 +22,6 @@ const { hasCapability, hasConfigCapability } = require('~/server/middleware/role
 const { getLdapConfig } = require('~/server/services/Config/ldap');
 const { getRumConfig } = require('~/server/services/Config/rum');
 const { getAppConfig } = require('~/server/services/Config/app');
-const {
-  hasKnowledgeManageAccess,
-  hasKnowledgeReadAccess,
-} = require('~/server/services/portalKnowledgeAccess');
 
 const router = express.Router();
 const emailLoginEnabled =
@@ -340,10 +336,7 @@ router.get('/', async function (req, res) {
     } catch (err) {
       logger.warn(`[config] Portal ACCESS_ADMIN capability check failed: ${err.message}`);
     }
-    const portal = buildPortalStartupConfig(process.env, canManagePortal, {
-      canRead: hasKnowledgeReadAccess(req),
-      canManage: hasKnowledgeManageAccess(req),
-    });
+    const portal = buildPortalStartupConfig(process.env, canManagePortal);
     if (portal) {
       payload.portal = portal;
     }
