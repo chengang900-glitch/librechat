@@ -1,3 +1,4 @@
+import { SystemRoles } from 'librechat-data-provider';
 import type { TPortalStartupConfig } from 'librechat-data-provider';
 import { isEnabled } from '~/utils';
 
@@ -27,7 +28,7 @@ const validatePortalUrl = (
 
 export function buildPortalStartupConfig(
   env: NodeJS.ProcessEnv = process.env,
-  canManage = false,
+  role?: string,
 ): TPortalStartupConfig | undefined {
   if (!isEnabled(env.PORTAL_ENABLED)) {
     return undefined;
@@ -48,7 +49,7 @@ export function buildPortalStartupConfig(
   return {
     enabled: true,
     brandName: env.APP_TITLE?.trim() || '企业AI中台',
-    canManage,
+    canManage: role === SystemRoles.ADMIN,
     navigation: {
       assistant: { label: 'AI工作台', path: '/c/new' },
       dataCenter: { label: '数据中心', url: dataCenterUrl, mode: 'new_tab' },

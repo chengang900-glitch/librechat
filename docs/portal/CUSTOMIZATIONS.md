@@ -94,7 +94,7 @@
 **权限**
 
 - 所有路由要求 JWT 认证。
-- 管理路由使用 LibreChat `SystemCapabilities.ACCESS_ADMIN`。
+- 应用中心分类和应用管理路由使用 `requireAdmin`，严格要求 LibreChat `SystemRoles.ADMIN`；启动配置中的 `portal.canManage` 使用相同角色条件。
 - OIDC 通过 `OPENID_ADMIN_ROLE*` 将 Keycloak `platform-admins` 映射为 LibreChat 管理员。
 
 **文件**
@@ -376,3 +376,12 @@ Portal 镜像回滚使用上一个 Portal 标签；完全回到原生 LibreChat 
 - Caddy HTTP 入口增加 `/sandpack/*` 的 `handle_path` 路由，反代到 `sandpack:80`，并设置 CORS 与 Worker JavaScript MIME；门户仍使用 `http://demo.uhoo.cn:9433`。
 - LibreChat 实际镜像：`enterprise-ai/librechat:v0.8.8-rc4-portal.3-http-artifacts-correct`；`SANDPACK_BUNDLER_URL=http://demo.uhoo.cn:9433/sandpack`。
 - 已验证：Sandpack 容器 `healthy`；外部 `http://demo.uhoo.cn:9433/sandpack/index.html` 返回 200；LibreChat `/readyz` 返回 `OK`；MongoDB、网关、Keycloak 和其他现有服务保持运行。
+
+## 12. 2026-10-02 应用中心管理权限与收藏隔离
+
+- 分类管理、应用管理仅允许 LibreChat `ADMIN`；管理能力授权给其他角色也不会放行。普通用户不显示管理菜单，全部 7 个管理接口返回 403，未认证请求返回 401。
+- 收藏继续由后端以认证用户 ID 读取、增加和删除，保留 `(userId, appId)` 唯一索引；补充双用户收藏及取消收藏的隔离测试。
+- 已部署镜像：`enterprise-ai/librechat:v0.8.8-rc4-portal.6-admin-only-20261002`。本地 45 项相关测试及变更工作区类型检查通过；线上真实管理员、普通用户接口权限、两个账号共 7 条收藏归属及运行文件校验通过。
+- 完整浏览器企业 SSO 操作未在本次验收；Lighthouse 因测试脚本未找到英文注册入口而未通过。
+- 部署基于当前运行镜像构建增量版本，仅重建 LibreChat，保留全部 9 层 Compose 和旧镜像。
+- 详细验收与回退：[应用中心权限部署验收](ACCEPTANCE-2026-10-02-LIBRECHAT-PORTAL-ADMIN-ONLY.md)。

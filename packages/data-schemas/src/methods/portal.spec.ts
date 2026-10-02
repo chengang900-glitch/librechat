@@ -92,6 +92,23 @@ describe('portal data methods', () => {
     expect((await methods.listEnabledPortalCatalog(userId)).favoriteAppIds).toEqual([]);
   });
 
+  it('isolates favorites across users, including removal and reload', async () => {
+    const group = await createGroup();
+    const app = await createApp(group.id);
+    const userA = new Types.ObjectId().toString();
+    const userB = new Types.ObjectId().toString();
+
+    await methods.addPortalFavorite(userA, app.id);
+    expect((await methods.listEnabledPortalCatalog(userB)).favoriteAppIds).toEqual([]);
+    await methods.removePortalFavorite(userB, app.id);
+    expect((await methods.listEnabledPortalCatalog(userA)).favoriteAppIds).toEqual([app.id]);
+
+    await methods.addPortalFavorite(userB, app.id);
+    await methods.removePortalFavorite(userA, app.id);
+    expect((await methods.listEnabledPortalCatalog(userA)).favoriteAppIds).toEqual([]);
+    expect((await methods.listEnabledPortalCatalog(userB)).favoriteAppIds).toEqual([app.id]);
+  });
+
   it('prevents deleting a non-empty group', async () => {
     const group = await createGroup();
     await createApp(group.id);

@@ -1,9 +1,7 @@
 const path = require('path');
 const express = require('express');
 const multer = require('multer');
-const { createPortalAdminHandlers, isEnabled } = require('@librechat/api');
-const { SystemCapabilities } = require('@librechat/data-schemas');
-const { requireCapability } = require('~/server/middleware/roles/capabilities');
+const { createPortalAdminHandlers, isEnabled, requireAdmin } = require('@librechat/api');
 const { requireJwtAuth } = require('~/server/middleware');
 const paths = require('~/config/paths');
 const db = require('~/models');
@@ -13,7 +11,6 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 1_048_576, files: 1 },
 });
-const requireAdminAccess = requireCapability(SystemCapabilities.ACCESS_ADMIN);
 const handlers = createPortalAdminHandlers({
   iconDir: path.join(paths.imageOutput, 'portal'),
   listAdminPortalCatalog: db.listAdminPortalCatalog,
@@ -31,7 +28,7 @@ router.use((req, res, next) =>
     ? next()
     : res.status(404).json({ error: 'Portal is disabled' }),
 );
-router.use(requireJwtAuth, requireAdminAccess);
+router.use(requireJwtAuth, requireAdmin);
 router.get('/catalog', handlers.catalog);
 router.post('/groups', handlers.createGroup);
 router.patch('/groups/:groupId', handlers.updateGroup);

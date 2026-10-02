@@ -324,19 +324,7 @@ router.get('/', async function (req, res) {
       endpointsDropParamsMap: endpointsDropParamsMap,
     };
 
-    let canManagePortal = false;
-    try {
-      const userId = req.user.id ?? req.user._id?.toString();
-      if (userId) {
-        canManagePortal = await hasCapability(
-          { id: userId, role: req.user.role ?? '', tenantId: req.user.tenantId },
-          SystemCapabilities.ACCESS_ADMIN,
-        );
-      }
-    } catch (err) {
-      logger.warn(`[config] Portal ACCESS_ADMIN capability check failed: ${err.message}`);
-    }
-    const portal = buildPortalStartupConfig(process.env, canManagePortal);
+    const portal = buildPortalStartupConfig(process.env, req.user.role);
     if (portal) {
       payload.portal = portal;
     }

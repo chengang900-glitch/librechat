@@ -1,3 +1,4 @@
+import { SystemRoles } from 'librechat-data-provider';
 import { buildPortalStartupConfig } from './config';
 
 const baseEnv = {
@@ -10,11 +11,13 @@ const baseEnv = {
 
 describe('buildPortalStartupConfig', () => {
   it('returns no portal config when the feature is disabled', () => {
-    expect(buildPortalStartupConfig({ PORTAL_ENABLED: 'false' }, true)).toBeUndefined();
+    expect(
+      buildPortalStartupConfig({ PORTAL_ENABLED: 'false' }, SystemRoles.ADMIN),
+    ).toBeUndefined();
   });
 
   it('builds the four-entry navigation for an authenticated user', () => {
-    expect(buildPortalStartupConfig(baseEnv, true)).toEqual({
+    expect(buildPortalStartupConfig(baseEnv, SystemRoles.ADMIN)).toEqual({
       enabled: true,
       brandName: '企业AI中台',
       canManage: true,
@@ -34,6 +37,13 @@ describe('buildPortalStartupConfig', () => {
       },
     });
   });
+
+  it.each([undefined, '', SystemRoles.USER, 'CUSTOM_ADMIN', 'admin'])(
+    'hides management for non-ADMIN role %s',
+    (role) => {
+      expect(buildPortalStartupConfig(baseEnv, role)?.canManage).toBe(false);
+    },
+  );
 
   it('rejects HTTP navigation targets unless explicitly enabled', () => {
     expect(() => buildPortalStartupConfig({ ...baseEnv, PORTAL_ALLOW_HTTP: 'false' })).toThrow(
