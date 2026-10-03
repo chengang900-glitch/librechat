@@ -18,6 +18,7 @@ interface PortalDeps {
 }
 
 export interface PortalHandlers {
+  dataIdentity: (req: ServerRequest, res: Response) => Promise<Response>;
   catalog: (req: ServerRequest, res: Response) => Promise<Response>;
   addFavorite: (req: ServerRequest, res: Response) => Promise<Response>;
   removeFavorite: (req: ServerRequest, res: Response) => Promise<Response>;
@@ -37,6 +38,14 @@ const statusOf = (error: unknown): number =>
     : 500;
 
 export function createPortalHandlers(deps: PortalDeps): PortalHandlers {
+  async function dataIdentity(req: ServerRequest, res: Response) {
+    const user = req.user;
+    if (user?.provider !== 'openid' || !user.openidId || !user.openidIssuer) {
+      return res.status(403).json({ error: 'An OpenID portal identity is required' });
+    }
+    return res.status(200).json({ issuer: user.openidIssuer, subject: user.openidId });
+  }
+
   async function catalog(req: ServerRequest, res: Response) {
     try {
       return res.status(200).json(await deps.listEnabledPortalCatalog(userId(req)));
@@ -91,5 +100,5 @@ export function createPortalHandlers(deps: PortalDeps): PortalHandlers {
     }
   }
 
-  return { catalog, addFavorite, removeFavorite, launch };
+  return { dataIdentity, catalog, addFavorite, removeFavorite, launch };
 }

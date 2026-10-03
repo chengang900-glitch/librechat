@@ -8,7 +8,7 @@ import {
   TwoFactorScreen,
   RequestPasswordReset,
 } from '~/components/Auth';
-import { PortalAdmin, PortalApps, PortalDemoCenter, PortalKnowledgeCenter } from '~/portal';
+import { PortalAdmin, PortalApps, PortalDataCenter, PortalKnowledgeCenter } from '~/portal';
 import { MarketplaceProvider } from '~/components/Agents/MarketplaceContext';
 import AgentMarketplace from '~/components/Agents/Marketplace';
 import { OAuthSuccess, OAuthError } from '~/components/OAuth';
@@ -146,7 +146,7 @@ export const router = createBrowserRouter(
             },
             {
               path: 'portal/data',
-              element: <PortalDemoCenter kind="data" />,
+              element: <PortalDataCenter />,
             },
             {
               path: 'portal/knowledge',

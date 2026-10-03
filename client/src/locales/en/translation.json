@@ -1,4 +1,10 @@
 {
+  "com_ui_portal_data_auth": "Sign in with your personal account",
+  "com_ui_portal_data_unavailable": "The data workspace is unavailable. Retry or contact your administrator.",
+  "com_ui_portal_data_retry": "Retry",
+  "com_ui_portal_data_secure": "The data workspace requires a same-origin HTTP or HTTPS /metabase/ address.",
+  "com_ui_portal_data_signout": "Sign out of the portal",
+  "com_ui_portal_data_signout_failed": "Sign-out could not be completed. Retry before switching accounts.",
   "com_ui_repository_instructions": "Repository instructions",
   "com_ui_repository_instructions_prefer": "Prefer repository conventions",
   "com_ui_repository_instructions_defer": "Prefer agent conventions",

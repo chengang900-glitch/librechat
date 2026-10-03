@@ -18,6 +18,7 @@ router.use((req, res, next) =>
     : res.status(404).json({ error: 'Portal is disabled' }),
 );
 router.use(requireJwtAuth);
+router.get('/data-identity', handlers.dataIdentity);
 router.get('/catalog', handlers.catalog);
 router.put('/favorites/:appId', handlers.addFavorite);
 router.delete('/favorites/:appId', handlers.removeFavorite);
