@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Button } from '@librechat/client';
+import { Navigate } from 'react-router-dom';
 import { useGetStartupConfig } from '~/data-provider';
+import { getDataCenterWorkspace } from '../workspace';
 import { useAuthContext } from '~/hooks/AuthContext';
 import useLocalize from '~/hooks/useLocalize';
 
@@ -9,39 +10,20 @@ type View = { owner: string; state: 'loading' | 'auth' | 'ready' | 'error' };
 
 export default function DataCenter() {
   const configQuery = useGetStartupConfig();
-  const { user, token, isAuthenticated, logout } = useAuthContext();
+  const { user, token, isAuthenticated } = useAuthContext();
   const localize = useLocalize();
   const [view, setView] = useState<View>({ owner: '', state: 'loading' });
   const [retry, setRetry] = useState(0);
-  const [signingOut, setSigningOut] = useState(false);
-  const [signoutFailed, setSignoutFailed] = useState(false);
   const portal = configQuery.data?.portal;
   const owner = user?.id ?? '';
-  let target: URL | undefined;
-  try {
-    const candidate = new URL(portal?.navigation.dataCenter.url ?? '');
-    if (
-      candidate.origin === window.location.origin &&
-      candidate.pathname === '/metabase/' &&
-      !candidate.username &&
-      !candidate.password &&
-      !candidate.search &&
-      !candidate.hash &&
-      (candidate.protocol === 'http:' || candidate.protocol === 'https:')
-    ) {
-      target = candidate;
-    }
-  } catch {
-    // Invalid configuration never mounts a workspace.
-  }
-  const workspace = target?.href;
+  const workspace = getDataCenterWorkspace(portal?.navigation.dataCenter.url)?.href;
 
   useEffect(() => {
     const controller = new AbortController();
     let running = false;
     let alive = true;
     const check = async () => {
-      if (!workspace || !owner || !token || !isAuthenticated || signingOut || running) return;
+      if (!workspace || !owner || !token || !isAuthenticated || running) return;
       running = true;
       try {
         const [portalIdentity, metabaseIdentity] = await Promise.all([
@@ -89,27 +71,7 @@ export default function DataCenter() {
       controller.abort();
       window.clearInterval(timer);
     };
-  }, [workspace, owner, token, isAuthenticated, retry, signingOut]);
-
-  const signout = useCallback(async () => {
-    if (!workspace) return;
-    setSigningOut(true);
-    setSignoutFailed(false);
-    setView({ owner, state: 'auth' });
-    try {
-      const result = await fetch(`${workspace}auth/keycloak/logout`, {
-        method: 'POST',
-        credentials: 'same-origin',
-      });
-      // A 503 response still clears Metabase locally; LibreChat's native logout ends Keycloak SSO.
-      if (!result.ok && result.status !== 503) throw new Error('logout failed');
-      logout();
-    } catch {
-      setSignoutFailed(true);
-    } finally {
-      setSigningOut(false);
-    }
-  }, [workspace, owner, logout]);
+  }, [workspace, owner, token, isAuthenticated, retry]);
 
   if (configQuery.isLoading) return null;
   if (!portal?.enabled) return <Navigate to="/c/new" replace />;
@@ -119,27 +81,10 @@ export default function DataCenter() {
         {localize('com_ui_portal_data_secure')}
       </p>
     );
-  const state = view.owner === owner && isAuthenticated && !signingOut ? view.state : 'loading';
+  const state = view.owner === owner && isAuthenticated ? view.state : 'loading';
 
   return (
     <main className="flex h-full min-h-0 flex-col bg-surface-primary">
-      <div className="flex shrink-0 items-center justify-end gap-3 border-b border-border-light p-2">
-        <a
-          href={`${workspace}auth/keycloak/login`}
-          target="_top"
-          className="text-sm text-text-primary underline"
-        >
-          {localize('com_ui_portal_data_auth')}
-        </a>
-        <Button variant="outline" disabled={signingOut} onClick={signout}>
-          {localize('com_ui_portal_data_signout')}
-        </Button>
-      </div>
-      {signoutFailed && (
-        <p role="alert" className="p-3 text-text-secondary">
-          {localize('com_ui_portal_data_signout_failed')}
-        </p>
-      )}
       {state === 'ready' ? (
         <iframe
           key={owner}
@@ -166,6 +111,15 @@ export default function DataCenter() {
                 | 'com_ui_portal_data_unavailable',
             )}
           </p>
+          {state === 'auth' && (
+            <a
+              href={`${workspace}auth/keycloak/login`}
+              target="_top"
+              className="text-sm text-text-primary underline"
+            >
+              {localize('com_ui_portal_data_auth')}
+            </a>
+          )}
           {state === 'error' && (
             <Button variant="outline" onClick={() => setRetry((n) => n + 1)}>
               {localize('com_ui_portal_data_retry')}

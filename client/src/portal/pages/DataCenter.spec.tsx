@@ -1,5 +1,5 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import DataCenter from './DataCenter';
 
 const mockAuth = {
@@ -54,6 +54,9 @@ describe('Personal Metabase workspace', () => {
     expect(screen.queryByTitle('Data workspace')).not.toBeInTheDocument();
     const frame = await screen.findByTitle('Data workspace');
     expect(frame).toHaveAttribute('src', mockPortal.navigation.dataCenter.url);
+    expect(
+      screen.queryByRole('button', { name: 'com_ui_portal_data_signout' }),
+    ).not.toBeInTheDocument();
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/portal/data-identity',
       expect.objectContaining({ headers: { Authorization: 'Bearer test-only-token' } }),
@@ -68,12 +71,20 @@ describe('Personal Metabase workspace', () => {
     expect(mbOptions.headers).toBeUndefined();
   });
 
-  it.each([401, 403])('refuses a missing/invalid Metabase session (%s)', async (status) => {
-    setFetch(async (url) => response(identity, String(url).includes('/metabase/') ? status : 200));
+  it('offers the login link when the Metabase session is missing', async () => {
+    setFetch(async (url) => response(identity, String(url).includes('/metabase/') ? 401 : 200));
     mount();
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2));
+    expect(await screen.findByRole('link')).toHaveAttribute('target', '_top');
     expect(screen.queryByTitle('Data workspace')).not.toBeInTheDocument();
-    expect(screen.getByRole('link')).toHaveAttribute('target', '_top');
+  });
+
+  it('offers retry when the Metabase session check fails', async () => {
+    setFetch(async (url) => response(identity, String(url).includes('/metabase/') ? 403 : 200));
+    mount();
+    expect(
+      await screen.findByRole('button', { name: 'com_ui_portal_data_retry' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByTitle('Data workspace')).not.toBeInTheDocument();
   });
 
   it('refuses a stale session belonging to another subject even when the issuer matches', async () => {
@@ -113,27 +124,6 @@ describe('Personal Metabase workspace', () => {
     mount();
     expect(screen.queryByTitle('Data workspace')).not.toBeInTheDocument();
     expect(global.fetch).not.toHaveBeenCalled();
-  });
-
-  it('removes the frame and clears Metabase before invoking LibreChat logout', async () => {
-    mount();
-    await screen.findByTitle('Data workspace');
-    let finish: (value: Response) => void = () => {};
-    setFetch(
-      () =>
-        new Promise<Response>((resolve) => {
-          finish = resolve;
-        }),
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'com_ui_portal_data_signout' }));
-    expect(screen.queryByTitle('Data workspace')).not.toBeInTheDocument();
-    expect(mockAuth.logout).not.toHaveBeenCalled();
-    await act(async () => finish(response({}, 503)));
-    expect(mockAuth.logout).toHaveBeenCalledTimes(1);
-    expect(global.fetch).toHaveBeenCalledWith(
-      `${window.location.origin}/metabase/auth/keycloak/logout`,
-      expect.objectContaining({ method: 'POST', credentials: 'same-origin' }),
-    );
   });
 
   it('offers retry after network failure without mounting an unauthenticated frame', async () => {

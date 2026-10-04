@@ -1,12 +1,28 @@
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { TPortalStartupConfig } from 'librechat-data-provider';
 import PortalTopNav from './TopNav';
 
+const mockLogout = jest.fn();
+
+jest.mock('~/hooks/AuthContext', () => ({
+  useAuthContext: () => ({ logout: mockLogout }),
+}));
+
 jest.mock('~/components/Nav/AccountSettings', () => ({
   __esModule: true,
-  default: ({ placement }: { placement?: string }) => (
-    <div data-testid="top-account-settings" data-placement={placement} />
+  default: ({
+    placement,
+    onPortalLogout,
+  }: {
+    placement?: string;
+    onPortalLogout?: () => Promise<void>;
+  }) => (
+    <div data-testid="top-account-settings" data-placement={placement}>
+      {onPortalLogout && (
+        <button data-testid="portal-logout" onClick={() => void onPortalLogout()} />
+      )}
+    </div>
   ),
 }));
 
@@ -31,6 +47,10 @@ const config: TPortalStartupConfig = {
 };
 
 describe('PortalTopNav', () => {
+  beforeEach(() => {
+    mockLogout.mockClear();
+  });
+
   it('centers four icon menus and places the account menu on the right', async () => {
     render(
       <MemoryRouter initialEntries={['/c/new']}>
@@ -74,4 +94,39 @@ describe('PortalTopNav', () => {
       'topbar',
     );
   });
+
+  it.each([200, 503])(
+    'passes a same-origin portal logout handler to the account menu (%s)',
+    async (status) => {
+      const fetchMock = jest.fn(async () => ({ ok: status === 200, status }) as Response);
+      Object.defineProperty(global, 'fetch', {
+        configurable: true,
+        writable: true,
+        value: fetchMock,
+      });
+      const portalConfig = {
+        ...config,
+        navigation: {
+          ...config.navigation,
+          dataCenter: {
+            ...config.navigation.dataCenter,
+            url: `${window.location.origin}/metabase/`,
+          },
+        },
+      };
+
+      render(
+        <MemoryRouter initialEntries={['/portal/data']}>
+          <PortalTopNav config={portalConfig} />
+        </MemoryRouter>,
+      );
+
+      fireEvent.click(await screen.findByTestId('portal-logout'));
+      await waitFor(() => expect(mockLogout).toHaveBeenCalledTimes(1));
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${window.location.origin}/metabase/auth/keycloak/logout`,
+        expect.objectContaining({ method: 'POST', credentials: 'same-origin' }),
+      );
+    },
+  );
 });

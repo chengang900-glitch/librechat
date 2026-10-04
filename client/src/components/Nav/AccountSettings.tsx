@@ -1,7 +1,7 @@
 import { useState, memo, useRef } from 'react';
 import { useSetRecoilState } from 'recoil';
 import * as Menu from '@ariakit/react/menu';
-import { GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
+import { Avatar, DropdownMenuSeparator, GearIcon, useToastContext } from '@librechat/client';
 import {
   Archive,
   ChevronRight,
@@ -93,12 +93,18 @@ function HelpSubmenu({
 
 type AccountSettingsProps = {
   collapsed?: boolean;
+  onPortalLogout?: () => Promise<void>;
   placement?: 'sidebar' | 'topbar';
 };
 
-function AccountSettings({ collapsed = false, placement = 'sidebar' }: AccountSettingsProps) {
+function AccountSettings({
+  collapsed = false,
+  onPortalLogout,
+  placement = 'sidebar',
+}: AccountSettingsProps) {
   const localize = useLocalize();
   const { user, isAuthenticated, logout } = useAuthContext();
+  const { showToast } = useToastContext();
   const { data: startupConfig } = useGetStartupConfig();
   const balanceQuery = useGetUserBalance({
     enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
@@ -106,8 +112,19 @@ function AccountSettings({ collapsed = false, placement = 'sidebar' }: AccountSe
   const [showSettings, setShowSettings] = useState(false);
   const setShowShortcutsDialog = useSetRecoilState(store.showShortcutsDialog);
   const [showArchived, setShowArchived] = useState(false);
+  const [portalLogoutPending, setPortalLogoutPending] = useState(false);
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null);
   const isTopbar = placement === 'topbar';
+  const handlePortalLogout = async () => {
+    if (!onPortalLogout || portalLogoutPending) return;
+    setPortalLogoutPending(true);
+    try {
+      await onPortalLogout();
+    } catch {
+      showToast({ message: localize('com_ui_portal_data_signout_failed'), status: 'error' });
+      setPortalLogoutPending(false);
+    }
+  };
   let menuPlacement: 'bottom-end' | 'right-end' | undefined;
   let transformOrigin = 'bottom';
   let translate = '0 -4px';
@@ -189,11 +206,22 @@ function AccountSettings({ collapsed = false, placement = 'sidebar' }: AccountSe
           <GearIcon className="icon-md" aria-hidden="true" />
           {localize('com_nav_settings')}
         </Menu.MenuItem>
+        {onPortalLogout ? (
+          <Menu.MenuItem
+            onClick={() => void handlePortalLogout()}
+            disabled={portalLogoutPending}
+            className="select-item text-sm"
+          >
+            <LogOut className="icon-md" aria-hidden="true" />
+            {localize('com_ui_portal_data_signout')}
+          </Menu.MenuItem>
+        ) : (
+          <Menu.MenuItem onClick={() => logout()} className="select-item text-sm">
+            <LogOut className="icon-md" aria-hidden="true" />
+            {localize('com_nav_log_out')}
+          </Menu.MenuItem>
+        )}
         <DropdownMenuSeparator />
-        <Menu.MenuItem onClick={() => logout()} className="select-item text-sm">
-          <LogOut className="icon-md" aria-hidden="true" />
-          {localize('com_nav_log_out')}
-        </Menu.MenuItem>
       </Menu.Menu>
       {showArchived && (
         <ArchivedChatsModal

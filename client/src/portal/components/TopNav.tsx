@@ -1,12 +1,26 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Skeleton } from '@librechat/client';
 import { BarChart3, BookOpen, Brain, LayoutGrid } from 'lucide-react';
 import type { TPortalStartupConfig } from 'librechat-data-provider';
+import { getDataCenterWorkspace } from '../workspace';
+import { useAuthContext } from '~/hooks/AuthContext';
 
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
 export default function PortalTopNav({ config }: { config: TPortalStartupConfig }) {
+  const { logout } = useAuthContext();
+  const workspace = getDataCenterWorkspace(config.navigation.dataCenter.url)?.href;
+  const portalLogout = useCallback(async () => {
+    if (!workspace) return;
+    const result = await fetch(`${workspace}auth/keycloak/logout`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    });
+    if (!result.ok && result.status !== 503) throw new Error('logout failed');
+    logout();
+  }, [workspace, logout]);
+
   const internalClass = ({ isActive }: { isActive: boolean }) =>
     `flex h-14 shrink-0 items-center gap-2 border-b-2 px-3 text-sm font-medium transition sm:px-5 ${
       isActive
@@ -67,7 +81,11 @@ export default function PortalTopNav({ config }: { config: TPortalStartupConfig 
       </nav>
       <div className="justify-self-end pl-2 sm:pl-4">
         <Suspense fallback={<Skeleton className="h-9 w-9 rounded-lg" />}>
-          <AccountSettings collapsed placement="topbar" />
+          <AccountSettings
+            collapsed
+            placement="topbar"
+            onPortalLogout={workspace ? portalLogout : undefined}
+          />
         </Suspense>
       </div>
     </header>
