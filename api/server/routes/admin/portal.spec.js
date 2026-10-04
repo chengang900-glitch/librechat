@@ -16,6 +16,13 @@ jest.mock('@librechat/api', () => ({
         'deleteApp',
       ].map((name) => [name, (_req, res) => res.status(200).json({ handler: name })]),
     ),
+  createPortalSettingsHandlers: () =>
+    Object.fromEntries(
+      ['get', 'update', 'uploadLogo'].map((name) => [
+        name,
+        (_req, res) => res.status(200).json({ handler: name }),
+      ]),
+    ),
 }));
 jest.mock('~/server/middleware', () => ({
   requireJwtAuth: (req, res, next) => {
@@ -43,6 +50,9 @@ const endpoints = [
   ['post', '/apps'],
   ['patch', '/apps/app-id'],
   ['delete', '/apps/app-id'],
+  ['get', '/settings'],
+  ['put', '/settings'],
+  ['post', '/settings/logo/portal'],
 ];
 
 const previousEnabled = process.env.PORTAL_ENABLED;

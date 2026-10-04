@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FolderCog, Grid2X2, Settings, Star } from 'lucide-react';
+import { FolderCog, Grid2X2, Settings, Settings2, Star } from 'lucide-react';
 import type { TPortalGroup } from 'librechat-data-provider';
 import type { ComponentType } from 'react';
 import useLocalize from '~/hooks/useLocalize';
@@ -63,6 +63,17 @@ export default function PortalSidebar({ groups, selected, canManage }: Props) {
                 label: localize('com_portal_app_management'),
                 to: '/portal/admin/apps',
                 icon: Settings,
+              },
+            ],
+          },
+          {
+            label: localize('com_portal_system_settings'),
+            items: [
+              {
+                id: 'portal-settings',
+                label: localize('com_portal_portal_settings'),
+                to: '/portal/admin/settings/portal',
+                icon: Settings2,
               },
             ],
           },

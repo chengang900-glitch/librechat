@@ -52,6 +52,9 @@ export const portalFavorite = (appId: string) =>
 export const portalLaunch = (appId: string) =>
   `${portalRoot}/apps/${encodeURIComponent(appId)}/launch`;
 export const portalAdminCatalog = () => `${portalAdminRoot}/catalog`;
+export const portalAdminSettings = () => `${portalAdminRoot}/settings`;
+export const portalAdminLogo = (type: 'portal' | 'login') =>
+  `${portalAdminRoot}/settings/logo/${type}`;
 export const portalAdminGroups = () => `${portalAdminRoot}/groups`;
 export const portalAdminGroup = (groupId: string) =>
   `${portalAdminRoot}/groups/${encodeURIComponent(groupId)}`;

@@ -4,6 +4,7 @@ import type {
   CreatePortalAppInput,
   CreatePortalGroupInput,
   TPortalCatalog,
+  UpdatePortalSettingsInput,
   UpdatePortalAppInput,
   UpdatePortalGroupInput,
 } from 'librechat-data-provider';
@@ -43,7 +44,9 @@ export const usePortalAdminMutations = () => {
   const refresh = async () => {
     await Promise.all([
       queryClient.invalidateQueries([QueryKeys.portalAdminCatalog]),
+      queryClient.invalidateQueries([QueryKeys.portalAdminSettings]),
       queryClient.invalidateQueries([QueryKeys.portalCatalog]),
+      queryClient.invalidateQueries([QueryKeys.startupConfig]),
     ]);
   };
   const createGroup = useMutation(
@@ -72,5 +75,23 @@ export const usePortalAdminMutations = () => {
     mutationKey: [MutationKeys.portalAdmin, 'deleteApp'],
     onSuccess: refresh,
   });
-  return { createGroup, updateGroup, deleteGroup, createApp, updateApp, deleteApp };
+  const updateSettings = useMutation(
+    (input: UpdatePortalSettingsInput) => dataService.updatePortalAdminSettings(input),
+    { mutationKey: [MutationKeys.portalAdmin, 'updateSettings'], onSuccess: refresh },
+  );
+  const uploadLogo = useMutation(
+    ({ type, input }: { type: 'portal' | 'login'; input: FormData }) =>
+      dataService.uploadPortalLogo(type, input),
+    { mutationKey: [MutationKeys.portalAdmin, 'uploadLogo'], onSuccess: refresh },
+  );
+  return {
+    createGroup,
+    updateGroup,
+    deleteGroup,
+    createApp,
+    updateApp,
+    deleteApp,
+    updateSettings,
+    uploadLogo,
+  };
 };

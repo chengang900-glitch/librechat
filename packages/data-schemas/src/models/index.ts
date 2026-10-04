@@ -23,6 +23,7 @@ import { createSharedLinkModel } from './sharedLink';
 import { createAccessRoleModel } from './accessRole';
 import { createToolFavoriteModel } from './favorite';
 import { createPortalAppModel } from './portal/app';
+import { createPortalSettingsModel } from './portal/settings';
 import { createMCPServerModel } from './mcpServer';
 import { createAssistantModel } from './assistant';
 import { createSkillFileModel } from './skillFile';
@@ -94,6 +95,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
   PortalGroup: ReturnType<typeof createPortalGroupModel>;
   PortalApp: ReturnType<typeof createPortalAppModel>;
   PortalFavorite: ReturnType<typeof createPortalFavoriteModel>;
+  PortalSettings: ReturnType<typeof createPortalSettingsModel>;
   AgentTriggerDelivery: ReturnType<typeof createAgentTriggerDeliveryModel>;
   AgentTriggerLaneSequence: ReturnType<typeof createAgentTriggerLaneSequenceModel>;
   AgentTriggerUserPurge: ReturnType<typeof createAgentTriggerUserPurgeModel>;
@@ -146,6 +148,7 @@ export function createModels(mongoose: typeof import('mongoose')): {
     PortalGroup: createPortalGroupModel(mongoose),
     PortalApp: createPortalAppModel(mongoose),
     PortalFavorite: createPortalFavoriteModel(mongoose),
+    PortalSettings: createPortalSettingsModel(mongoose),
     AgentTriggerDelivery: createAgentTriggerDeliveryModel(mongoose),
     AgentTriggerLaneSequence: createAgentTriggerLaneSequenceModel(mongoose),
     AgentTriggerUserPurge: createAgentTriggerUserPurgeModel(mongoose),

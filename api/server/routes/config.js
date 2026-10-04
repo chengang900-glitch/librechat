@@ -22,6 +22,7 @@ const { hasCapability, hasConfigCapability } = require('~/server/middleware/role
 const { getLdapConfig } = require('~/server/services/Config/ldap');
 const { getRumConfig } = require('~/server/services/Config/rum');
 const { getAppConfig } = require('~/server/services/Config/app');
+const db = require('~/models');
 
 const router = express.Router();
 const emailLoginEnabled =
@@ -324,7 +325,15 @@ router.get('/', async function (req, res) {
       endpointsDropParamsMap: endpointsDropParamsMap,
     };
 
-    const portal = buildPortalStartupConfig(process.env, req.user.role);
+    let portalSettings = null;
+    if (isEnabled(process.env.PORTAL_ENABLED)) {
+      try {
+        portalSettings = await db.getPortalSettings();
+      } catch (error) {
+        logger.warn(`[config] Portal settings unavailable: ${error.message}`);
+      }
+    }
+    const portal = buildPortalStartupConfig(process.env, req.user.role, portalSettings);
     if (portal) {
       payload.portal = portal;
     }

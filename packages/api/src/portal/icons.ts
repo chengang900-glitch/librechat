@@ -63,3 +63,37 @@ export async function removePortalIcon(
     }
   }
 }
+
+export async function savePortalBranding(
+  file: PortalUpload,
+  brandingDir: string,
+  type: 'portal' | 'login',
+): Promise<string> {
+  if (file.size > 1_048_576) throw new PortalIconError('Logo must not exceed 1 MB');
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+    throw new PortalIconError('Logo must be PNG, JPEG, or WebP');
+  }
+  let output: Buffer;
+  try {
+    const image = sharp(file.buffer, { failOn: 'error' });
+    const metadata = await image.metadata();
+    if (!metadata.format || !allowedFormats.has(metadata.format)) {
+      throw new PortalIconError('Logo content is not a supported raster image');
+    }
+    output = await image
+      .rotate()
+      .resize(800, 240, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 90 })
+      .toBuffer();
+  } catch (error) {
+    if (error instanceof PortalIconError) throw error;
+    throw new PortalIconError('Logo content is not a supported raster image');
+  }
+  await fs.mkdir(brandingDir, { recursive: true });
+  const filename = `${type}-logo.webp`;
+  const target = path.join(brandingDir, filename);
+  const temporary = `${target}.${randomUUID()}.tmp`;
+  await fs.writeFile(temporary, output, { flag: 'wx' });
+  await fs.rename(temporary, target);
+  return `/images/portal/branding/${filename}?v=${Date.now()}`;
+}

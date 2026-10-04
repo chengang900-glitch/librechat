@@ -33,7 +33,7 @@ export default function PortalTopNav({ config }: { config: TPortalStartupConfig 
       <div className="flex min-w-0 items-center gap-2 justify-self-start pr-2 sm:pr-4">
         <img
           data-testid="portal-brand-logo"
-          src="/assets/portal/uhoo-logo.png"
+          src={config.brandLogoUrl || '/assets/portal/uhoo-logo.png'}
           alt=""
           className="h-5 w-auto shrink-0 object-contain"
         />
@@ -54,22 +54,26 @@ export default function PortalTopNav({ config }: { config: TPortalStartupConfig 
           <Brain className="h-[18px] w-[18px]" aria-hidden="true" />
           <span className="hidden sm:inline">{config.navigation.assistant.label}</span>
         </NavLink>
-        <NavLink
-          to="/portal/data"
-          className={internalClass}
-          aria-label={config.navigation.dataCenter.label}
-        >
-          <BarChart3 className="h-[18px] w-[18px]" aria-hidden="true" />
-          <span className="hidden sm:inline">{config.navigation.dataCenter.label}</span>
-        </NavLink>
-        <NavLink
-          to="/portal/knowledge"
-          className={internalClass}
-          aria-label={config.navigation.documentCenter.label}
-        >
-          <BookOpen className="h-[18px] w-[18px]" aria-hidden="true" />
-          <span className="hidden sm:inline">{config.navigation.documentCenter.label}</span>
-        </NavLink>
+        {config.navigation.dataCenter.enabled !== false && (
+          <NavLink
+            to="/portal/data"
+            className={internalClass}
+            aria-label={config.navigation.dataCenter.label}
+          >
+            <BarChart3 className="h-[18px] w-[18px]" aria-hidden="true" />
+            <span className="hidden sm:inline">{config.navigation.dataCenter.label}</span>
+          </NavLink>
+        )}
+        {config.navigation.documentCenter.enabled !== false && (
+          <NavLink
+            to="/portal/knowledge"
+            className={internalClass}
+            aria-label={config.navigation.documentCenter.label}
+          >
+            <BookOpen className="h-[18px] w-[18px]" aria-hidden="true" />
+            <span className="hidden sm:inline">{config.navigation.documentCenter.label}</span>
+          </NavLink>
+        )}
         <NavLink
           to={config.navigation.appCenter.path}
           className={internalClass}

@@ -1,9 +1,11 @@
 import mongoose, { Types } from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import type { IPortalApp, IPortalFavorite, IPortalGroup } from '~/types';
+import type { IPortalSettings } from '~/types/portalSettings';
 import portalFavoriteSchema from '~/schema/portal/favorite';
 import portalGroupSchema from '~/schema/portal/group';
 import portalAppSchema from '~/schema/portal/app';
+import portalSettingsSchema from '~/schema/portal/settings';
 import { createPortalMethods } from './portal';
 
 jest.setTimeout(60_000);
@@ -23,6 +25,9 @@ beforeAll(async () => {
   if (!mongoose.models.PortalFavorite) {
     mongoose.model<IPortalFavorite>('PortalFavorite', portalFavoriteSchema);
   }
+  if (!mongoose.models.PortalSettings) {
+    mongoose.model<IPortalSettings>('PortalSettings', portalSettingsSchema);
+  }
   methods = createPortalMethods(mongoose);
 });
 
@@ -36,6 +41,7 @@ beforeEach(async () => {
     mongoose.models.PortalGroup.deleteMany({}),
     mongoose.models.PortalApp.deleteMany({}),
     mongoose.models.PortalFavorite.deleteMany({}),
+    mongoose.models.PortalSettings.deleteMany({}),
   ]);
 });
 
@@ -127,5 +133,23 @@ describe('portal data methods', () => {
       code: 'PORTAL_DUPLICATE_NAME',
       status: 409,
     });
+  });
+
+  it('persists portal settings as a singleton and returns plain settings', async () => {
+    const saved = await methods.updatePortalSettings({
+      brand: { portalLogoUrl: '/images/portal/branding/portal-logo.webp?v=1' },
+      dataCenter: { enabled: true, label: '经营数据', url: 'https://data.example.com/' },
+      knowledgeCenter: { enabled: true, label: '企业知识', url: 'https://knowledge.example.com/' },
+      updatedBy: 'admin',
+    });
+    expect(saved.dataCenter.label).toBe('经营数据');
+    expect((await methods.getPortalSettings())?.brand.portalLogoUrl).toContain('portal-logo.webp');
+
+    const updated = await methods.updatePortalSettings({
+      dataCenter: { enabled: false, label: '经营数据', url: 'https://data.example.com/' },
+      updatedBy: 'admin-2',
+    });
+    expect(updated.dataCenter.enabled).toBe(false);
+    expect(await mongoose.models.PortalSettings.countDocuments()).toBe(1);
   });
 });

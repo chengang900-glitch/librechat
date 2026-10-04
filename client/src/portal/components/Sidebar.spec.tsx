@@ -14,6 +14,8 @@ jest.mock('~/hooks/useLocalize', () => ({
       com_portal_management_menu: '应用管理',
       com_portal_group_management: '分类管理',
       com_portal_app_management: '应用管理',
+      com_portal_system_settings: '系统设置',
+      com_portal_portal_settings: '门户设置',
     })[key] ?? key,
 }));
 
@@ -45,7 +47,11 @@ describe('PortalSidebar', () => {
       'href',
       '/portal/admin/groups',
     );
-    expect(screen.getByRole('navigation').querySelectorAll('a svg')).toHaveLength(6);
+    expect(screen.getByRole('link', { name: '门户设置' })).toHaveAttribute(
+      'href',
+      '/portal/admin/settings/portal',
+    );
+    expect(screen.getByRole('navigation').querySelectorAll('a svg')).toHaveLength(7);
   });
 
   it('hides management navigation from ordinary users', () => {

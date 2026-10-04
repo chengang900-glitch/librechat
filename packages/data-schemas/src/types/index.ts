@@ -50,6 +50,7 @@ export * from './admin';
 /* Web */
 export * from './web';
 export * from './portal';
+export * from './portalSettings';
 /* MCP Servers */
 export * from './mcp';
 export * from './mcpAuthority';

@@ -2995,5 +2995,18 @@
   "com_portal_no_favorites": "You have no favorite applications yet.",
   "com_portal_search_placeholder": "Search applications",
   "com_portal_sort_order": "Sort order",
-  "com_portal_url": "Application URL"
+  "com_portal_url": "Application URL",
+  "com_portal_system_settings": "System settings",
+  "com_portal_portal_settings": "Portal settings",
+  "com_portal_settings_description": "Configure portal branding and external center addresses.",
+  "com_portal_settings_saved": "Portal settings saved.",
+  "com_portal_brand_settings": "Company logo settings",
+  "com_portal_portal_logo": "Portal logo",
+  "com_portal_login_logo": "Login page logo",
+  "com_portal_data_center_settings": "Data center settings",
+  "com_portal_knowledge_center_settings": "Knowledge center settings",
+  "com_portal_save_settings": "Save settings",
+  "com_portal_default_logo": "Default logo",
+  "com_portal_setting_name": "Name",
+  "com_portal_setting_address": "Portal address"
 }

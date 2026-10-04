@@ -38,6 +38,23 @@ describe('buildPortalStartupConfig', () => {
     });
   });
 
+  it('uses persisted portal settings when provided', () => {
+    const config = buildPortalStartupConfig(baseEnv, SystemRoles.ADMIN, {
+      brand: { portalLogoUrl: '/images/portal/branding/portal-logo.webp?v=1' },
+      dataCenter: { enabled: true, label: '经营数据', url: 'https://data.example.com/' },
+      knowledgeCenter: { enabled: true, label: '企业知识', url: 'https://knowledge.example.com/' },
+    });
+    expect(config?.brandLogoUrl).toContain('/images/portal/branding/portal-logo.webp');
+    expect(config?.navigation.dataCenter).toMatchObject({
+      label: '经营数据',
+      url: 'https://data.example.com/',
+    });
+    expect(config?.navigation.documentCenter).toMatchObject({
+      label: '企业知识',
+      url: 'https://knowledge.example.com/',
+    });
+  });
+
   it.each([undefined, '', SystemRoles.USER, 'CUSTOM_ADMIN', 'admin'])(
     'hides management for non-ADMIN role %s',
     (role) => {

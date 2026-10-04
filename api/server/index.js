@@ -364,6 +364,20 @@ const startServer = async () => {
   app.use(staticCache(appConfig.paths.dist));
   app.use(staticCache(appConfig.paths.fonts));
   app.use(staticCache(appConfig.paths.assets));
+  app.get('/branding/login-logo.webp', (_req, res, next) => {
+    const uploadedLogo = path.join(
+      appConfig.paths.imageOutput,
+      'portal',
+      'branding',
+      'login-logo.webp',
+    );
+    if (fs.existsSync(uploadedLogo)) return next();
+    return res.sendFile(path.join(appConfig.paths.assets, 'portal', 'uhoo-logo.png'));
+  });
+  app.use(
+    '/branding',
+    staticCache(path.join(appConfig.paths.imageOutput, 'portal', 'branding'), { noCache: true }),
+  );
 
   if (telemetry.enabled) {
     app.use(telemetry.telemetryMiddleware);

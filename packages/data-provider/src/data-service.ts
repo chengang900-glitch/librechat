@@ -5,6 +5,8 @@ import type {
   TPortalAdminCatalog,
   TPortalCatalog,
   TPortalLaunchResponse,
+  TPortalSettings,
+  UpdatePortalSettingsInput,
   UpdatePortalAppInput,
   UpdatePortalGroupInput,
 } from './portal';
@@ -1689,6 +1691,23 @@ export function launchPortalApp(appId: string): Promise<TPortalLaunchResponse> {
 
 export function getPortalAdminCatalog(): Promise<TPortalAdminCatalog> {
   return request.get(endpoints.portalAdminCatalog());
+}
+
+export function getPortalAdminSettings(): Promise<TPortalSettings> {
+  return request.get(endpoints.portalAdminSettings());
+}
+
+export function updatePortalAdminSettings(
+  input: UpdatePortalSettingsInput,
+): Promise<TPortalSettings> {
+  return request.put(endpoints.portalAdminSettings(), input);
+}
+
+export function uploadPortalLogo(
+  type: 'portal' | 'login',
+  input: FormData,
+): Promise<TPortalSettings> {
+  return request.postMultiPart(endpoints.portalAdminLogo(type), input);
 }
 
 export function createPortalGroup(input: CreatePortalGroupInput): Promise<void> {

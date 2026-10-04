@@ -1,5 +1,5 @@
 import { SystemRoles } from 'librechat-data-provider';
-import type { TPortalStartupConfig } from 'librechat-data-provider';
+import type { TPortalSettings, TPortalStartupConfig } from 'librechat-data-provider';
 import { isEnabled } from '~/utils';
 
 const validatePortalUrl = (
@@ -29,6 +29,7 @@ const validatePortalUrl = (
 export function buildPortalStartupConfig(
   env: NodeJS.ProcessEnv = process.env,
   role?: string,
+  settings?: TPortalSettings | null,
 ): TPortalStartupConfig | undefined {
   if (!isEnabled(env.PORTAL_ENABLED)) {
     return undefined;
@@ -36,12 +37,12 @@ export function buildPortalStartupConfig(
 
   const allowHttp = isEnabled(env.PORTAL_ALLOW_HTTP);
   const dataCenterUrl = validatePortalUrl(
-    env.PORTAL_DATA_CENTER_URL,
+    settings?.dataCenter?.url || env.PORTAL_DATA_CENTER_URL,
     allowHttp,
     'PORTAL_DATA_CENTER_URL',
   );
   const documentCenterUrl = validatePortalUrl(
-    env.PORTAL_DOCUMENT_CENTER_URL,
+    settings?.knowledgeCenter?.url || env.PORTAL_DOCUMENT_CENTER_URL,
     allowHttp,
     'PORTAL_DOCUMENT_CENTER_URL',
   );
@@ -49,11 +50,22 @@ export function buildPortalStartupConfig(
   return {
     enabled: true,
     brandName: env.APP_TITLE?.trim() || '企业AI中台',
+    ...(settings?.brand?.portalLogoUrl ? { brandLogoUrl: settings.brand.portalLogoUrl } : {}),
     canManage: role === SystemRoles.ADMIN,
     navigation: {
       assistant: { label: 'AI工作台', path: '/c/new' },
-      dataCenter: { label: '数据中心', url: dataCenterUrl, mode: 'new_tab' },
-      documentCenter: { label: '知识中心', url: documentCenterUrl, mode: 'new_tab' },
+      dataCenter: {
+        label: settings?.dataCenter?.label || '数据中心',
+        url: dataCenterUrl,
+        mode: 'new_tab',
+        ...(settings ? { enabled: settings.dataCenter.enabled } : {}),
+      },
+      documentCenter: {
+        label: settings?.knowledgeCenter?.label || '知识中心',
+        url: documentCenterUrl,
+        mode: 'new_tab',
+        ...(settings ? { enabled: settings.knowledgeCenter.enabled } : {}),
+      },
       appCenter: { label: '应用中心', path: '/portal/apps' },
     },
   };

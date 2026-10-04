@@ -25,13 +25,42 @@ export type PortalOpenMode = (typeof portalOpenModes)[number];
 export type TPortalStartupConfig = {
   enabled: boolean;
   brandName: string;
+  brandLogoUrl?: string;
   canManage: boolean;
   navigation: {
     assistant: { label: string; path: '/c/new' };
-    dataCenter: { label: string; url: string; mode: PortalOpenMode };
-    documentCenter: { label: string; url: string; mode: PortalOpenMode };
+    dataCenter: { label: string; url: string; mode: PortalOpenMode; enabled?: boolean };
+    documentCenter: { label: string; url: string; mode: PortalOpenMode; enabled?: boolean };
     appCenter: { label: string; path: '/portal/apps' };
   };
+};
+
+export type TPortalSettings = {
+  brand: {
+    portalLogoUrl?: string;
+    loginLogoUrl?: string;
+  };
+  dataCenter: {
+    enabled: boolean;
+    label: string;
+    url: string;
+  };
+  knowledgeCenter: {
+    enabled: boolean;
+    label: string;
+    url: string;
+  };
+  updatedAt?: string;
+  updatedBy?: string;
+};
+
+export type UpdatePortalSettingsInput = {
+  brand?: {
+    portalLogoUrl?: string;
+    loginLogoUrl?: string;
+  };
+  dataCenter?: Partial<TPortalSettings['dataCenter']>;
+  knowledgeCenter?: Partial<TPortalSettings['knowledgeCenter']>;
 };
 
 export type TPortalGroup = {

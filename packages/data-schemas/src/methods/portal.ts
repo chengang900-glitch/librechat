@@ -7,11 +7,14 @@ import type {
   TPortalApp,
   TPortalCatalog,
   TPortalGroup,
+  TPortalSettings,
+  UpdatePortalSettingsInput,
   UpdatePortalAppInput,
   UpdatePortalGroupInput,
 } from 'librechat-data-provider';
 import type { Model, Types } from 'mongoose';
 import type { IPortalApp, IPortalFavorite, IPortalGroup } from '~/types';
+import type { IPortalSettings } from '~/types/portalSettings';
 
 const MAX_GROUPS = 100;
 const MAX_APPS = 500;
@@ -97,12 +100,17 @@ export interface PortalMethods {
   findLaunchablePortalApp: (id: string) => Promise<TPortalAdminApp | null>;
   addPortalFavorite: (userId: string, appId: string) => Promise<void>;
   removePortalFavorite: (userId: string, appId: string) => Promise<void>;
+  getPortalSettings: () => Promise<TPortalSettings | null>;
+  updatePortalSettings: (
+    input: UpdatePortalSettingsInput & { updatedBy: string },
+  ) => Promise<TPortalSettings>;
 }
 
 export function createPortalMethods(mongoose: typeof import('mongoose')): PortalMethods {
   const groupModel = () => mongoose.models.PortalGroup as Model<IPortalGroup>;
   const appModel = () => mongoose.models.PortalApp as Model<IPortalApp>;
   const favoriteModel = () => mongoose.models.PortalFavorite as Model<IPortalFavorite>;
+  const settingsModel = () => mongoose.models.PortalSettings as Model<IPortalSettings>;
   const objectId = (value: string, field: string): Types.ObjectId => {
     if (!mongoose.Types.ObjectId.isValid(value)) {
       throw new PortalDataError('PORTAL_INVALID_ID', 400, `${field} is invalid`);
@@ -289,6 +297,30 @@ export function createPortalMethods(mongoose: typeof import('mongoose')): Portal
     });
   }
 
+  const mapSettings = (settings: IPortalSettings): TPortalSettings => ({
+    brand: settings.brand ?? {},
+    dataCenter: settings.dataCenter ?? { enabled: true, label: '数据中心', url: '' },
+    knowledgeCenter: settings.knowledgeCenter ?? { enabled: true, label: '知识中心', url: '' },
+    updatedAt: settings.updatedAt?.toISOString(),
+    updatedBy: settings.updatedBy,
+  });
+
+  async function getPortalSettings(): Promise<TPortalSettings | null> {
+    const settings = await settingsModel().findOne({ key: 'default' }).lean<IPortalSettings>();
+    return settings ? mapSettings(settings) : null;
+  }
+
+  async function updatePortalSettings(
+    input: UpdatePortalSettingsInput & { updatedBy: string },
+  ): Promise<TPortalSettings> {
+    const settings = await settingsModel().findOneAndUpdate(
+      { key: 'default' },
+      { $set: { ...input, key: 'default' } },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
+    return mapSettings(settings);
+  }
+
   return {
     listEnabledPortalCatalog,
     listAdminPortalCatalog,
@@ -301,5 +333,7 @@ export function createPortalMethods(mongoose: typeof import('mongoose')): Portal
     findLaunchablePortalApp,
     addPortalFavorite,
     removePortalFavorite,
+    getPortalSettings,
+    updatePortalSettings,
   };
 }

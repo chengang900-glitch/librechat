@@ -1,7 +1,12 @@
 const path = require('path');
 const express = require('express');
 const multer = require('multer');
-const { createPortalAdminHandlers, isEnabled, requireAdmin } = require('@librechat/api');
+const {
+  createPortalAdminHandlers,
+  createPortalSettingsHandlers,
+  isEnabled,
+  requireAdmin,
+} = require('@librechat/api');
 const { requireJwtAuth } = require('~/server/middleware');
 const paths = require('~/config/paths');
 const db = require('~/models');
@@ -22,6 +27,12 @@ const handlers = createPortalAdminHandlers({
   deletePortalApp: db.deletePortalApp,
   recordAuditEntry: db.recordAuditEntry,
 });
+const settingsHandlers = createPortalSettingsHandlers({
+  getPortalSettings: db.getPortalSettings,
+  updatePortalSettings: db.updatePortalSettings,
+  brandingDir: path.join(paths.imageOutput, 'portal', 'branding'),
+  allowHttp: isEnabled(process.env.PORTAL_ALLOW_HTTP),
+});
 
 router.use((req, res, next) =>
   isEnabled(process.env.PORTAL_ENABLED)
@@ -30,6 +41,9 @@ router.use((req, res, next) =>
 );
 router.use(requireJwtAuth, requireAdmin);
 router.get('/catalog', handlers.catalog);
+router.get('/settings', settingsHandlers.get);
+router.put('/settings', settingsHandlers.update);
+router.post('/settings/logo/:type', upload.single('logo'), settingsHandlers.uploadLogo);
 router.post('/groups', handlers.createGroup);
 router.patch('/groups/:groupId', handlers.updateGroup);
 router.delete('/groups/:groupId', handlers.deleteGroup);

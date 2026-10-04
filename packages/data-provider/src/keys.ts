@@ -95,6 +95,7 @@ export enum QueryKeys {
   favorites = 'favorites',
   portalCatalog = 'portalCatalog',
   portalAdminCatalog = 'portalAdminCatalog',
+  portalAdminSettings = 'portalAdminSettings',
   /* Scheduled chats */
   schedules = 'schedules',
   schedule = 'schedule',
