@@ -1,18 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import type { TPortalSettings } from 'librechat-data-provider';
+import type { TPortalDataCenterEmbed } from 'librechat-data-provider';
 import {
   useGetStartupConfig,
   usePortalAdminCatalog,
   usePortalAdminMutations,
   usePortalAdminSettings,
 } from '~/data-provider';
-import useLocalize from '~/hooks/useLocalize';
 import PortalSidebar from '../components/Sidebar';
+import useLocalize from '~/hooks/useLocalize';
 
-type ServiceForm = TPortalSettings['dataCenter'];
+type ServiceForm = {
+  enabled: boolean;
+  label: string;
+  url: string;
+};
+type DataCenterForm = ServiceForm & { embed: TPortalDataCenterEmbed };
 
 const emptyService: ServiceForm = { enabled: true, label: '', url: '' };
+const emptyDataCenter: DataCenterForm = {
+  ...emptyService,
+  embed: { search: false, newButton: false, appSwitcher: false },
+};
 const defaultLogoUrl = '/assets/portal/uhoo-logo.png';
 
 export default function PortalSettings() {
@@ -23,7 +32,7 @@ export default function PortalSettings() {
   const mutations = usePortalAdminMutations();
   const [portalLogoUrl, setPortalLogoUrl] = useState('');
   const [loginLogoUrl, setLoginLogoUrl] = useState('');
-  const [dataCenter, setDataCenter] = useState<ServiceForm>(emptyService);
+  const [dataCenter, setDataCenter] = useState<DataCenterForm>(emptyDataCenter);
   const [knowledgeCenter, setKnowledgeCenter] = useState<ServiceForm>(emptyService);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
@@ -37,9 +46,10 @@ export default function PortalSettings() {
       settings?.dataCenter?.url
         ? settings.dataCenter
         : {
-            enabled: true,
+            ...emptyDataCenter,
             label: portal?.navigation.dataCenter.label ?? '数据中心',
             url: portal?.navigation.dataCenter.url ?? '',
+            embed: portal?.navigation.dataCenter.embed ?? emptyDataCenter.embed,
           },
     );
     setKnowledgeCenter(
@@ -142,6 +152,13 @@ export default function PortalSettings() {
             nameLabel={localize('com_portal_setting_name')}
             addressLabel={localize('com_portal_setting_address')}
             enabledLabel={localize('com_portal_enabled')}
+            embed={dataCenter.embed}
+            embedLabels={{
+              title: localize('com_portal_data_center_embed_settings'),
+              search: localize('com_portal_data_center_embed_search'),
+              newButton: localize('com_portal_data_center_embed_new'),
+              appSwitcher: localize('com_portal_data_center_embed_app_switcher'),
+            }}
           />
           <ServiceSection
             title={localize('com_portal_knowledge_center_settings')}
@@ -195,20 +212,29 @@ function LogoField({
   );
 }
 
-function ServiceSection({
+function ServiceSection<T extends ServiceForm>({
   title,
   value,
   onChange,
   nameLabel,
   addressLabel,
   enabledLabel,
+  embed,
+  embedLabels,
 }: {
   title: string;
-  value: ServiceForm;
-  onChange: (value: ServiceForm) => void;
+  value: T;
+  onChange: (value: T) => void;
   nameLabel: string;
   addressLabel: string;
   enabledLabel: string;
+  embed?: TPortalDataCenterEmbed;
+  embedLabels?: {
+    title: string;
+    search: string;
+    newButton: string;
+    appSwitcher: string;
+  };
 }) {
   return (
     <section className="rounded-2xl border border-border-light p-5 dark:border-border-medium">
@@ -243,6 +269,53 @@ function ServiceSection({
         />
         {enabledLabel}
       </label>
+      {embed && embedLabels && (
+        <fieldset className="mt-5 space-y-3 border-t border-border-light pt-4 dark:border-border-medium">
+          <legend className="text-sm font-medium text-text-primary">{embedLabels.title}</legend>
+          <ToggleField
+            checked={embed.search}
+            label={embedLabels.search}
+            onChange={(checked) =>
+              onChange({ ...value, embed: { ...embed, search: checked } } as T)
+            }
+          />
+          <ToggleField
+            checked={embed.newButton}
+            label={embedLabels.newButton}
+            onChange={(checked) =>
+              onChange({ ...value, embed: { ...embed, newButton: checked } } as T)
+            }
+          />
+          <ToggleField
+            checked={embed.appSwitcher}
+            label={embedLabels.appSwitcher}
+            onChange={(checked) =>
+              onChange({ ...value, embed: { ...embed, appSwitcher: checked } } as T)
+            }
+          />
+        </fieldset>
+      )}
     </section>
+  );
+}
+
+function ToggleField({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center gap-2 text-sm text-text-secondary">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+      {label}
+    </label>
   );
 }

@@ -2,6 +2,12 @@ import { SystemRoles } from 'librechat-data-provider';
 import type { TPortalSettings, TPortalStartupConfig } from 'librechat-data-provider';
 import { isEnabled } from '~/utils';
 
+const defaultDataCenterEmbed = {
+  search: false,
+  newButton: false,
+  appSwitcher: false,
+} as const;
+
 const validatePortalUrl = (
   value: string | undefined,
   allowHttp: boolean,
@@ -58,6 +64,7 @@ export function buildPortalStartupConfig(
         label: settings?.dataCenter?.label || '数据中心',
         url: dataCenterUrl,
         mode: 'new_tab',
+        embed: { ...defaultDataCenterEmbed, ...settings?.dataCenter?.embed },
         ...(settings ? { enabled: settings.dataCenter.enabled } : {}),
       },
       documentCenter: {

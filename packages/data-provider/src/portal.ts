@@ -22,6 +22,12 @@ export type PortalPresetIcon = (typeof portalPresetIcons)[number];
 export type PortalIconType = (typeof portalIconTypes)[number];
 export type PortalOpenMode = (typeof portalOpenModes)[number];
 
+export type TPortalDataCenterEmbed = {
+  search: boolean;
+  newButton: boolean;
+  appSwitcher: boolean;
+};
+
 export type TPortalStartupConfig = {
   enabled: boolean;
   brandName: string;
@@ -29,7 +35,13 @@ export type TPortalStartupConfig = {
   canManage: boolean;
   navigation: {
     assistant: { label: string; path: '/c/new' };
-    dataCenter: { label: string; url: string; mode: PortalOpenMode; enabled?: boolean };
+    dataCenter: {
+      label: string;
+      url: string;
+      mode: PortalOpenMode;
+      enabled?: boolean;
+      embed: TPortalDataCenterEmbed;
+    };
     documentCenter: { label: string; url: string; mode: PortalOpenMode; enabled?: boolean };
     appCenter: { label: string; path: '/portal/apps' };
   };
@@ -44,6 +56,7 @@ export type TPortalSettings = {
     enabled: boolean;
     label: string;
     url: string;
+    embed: TPortalDataCenterEmbed;
   };
   knowledgeCenter: {
     enabled: boolean;
@@ -59,7 +72,9 @@ export type UpdatePortalSettingsInput = {
     portalLogoUrl?: string;
     loginLogoUrl?: string;
   };
-  dataCenter?: Partial<TPortalSettings['dataCenter']>;
+  dataCenter?: Partial<Omit<TPortalSettings['dataCenter'], 'embed'>> & {
+    embed?: Partial<TPortalDataCenterEmbed>;
+  };
   knowledgeCenter?: Partial<TPortalSettings['knowledgeCenter']>;
 };
 

@@ -29,6 +29,14 @@ const settingsSchema = z.object({
       enabled: z.coerce.boolean(),
       label: z.string().trim().min(1).max(40),
       url: urlSchema,
+      embed: z
+        .object({
+          search: z.coerce.boolean(),
+          newButton: z.coerce.boolean(),
+          appSwitcher: z.coerce.boolean(),
+        })
+        .partial()
+        .optional(),
     })
     .optional(),
   knowledgeCenter: z

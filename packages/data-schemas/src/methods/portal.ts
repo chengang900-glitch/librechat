@@ -299,7 +299,16 @@ export function createPortalMethods(mongoose: typeof import('mongoose')): Portal
 
   const mapSettings = (settings: IPortalSettings): TPortalSettings => ({
     brand: settings.brand ?? {},
-    dataCenter: settings.dataCenter ?? { enabled: true, label: '数据中心', url: '' },
+    dataCenter: {
+      enabled: settings.dataCenter?.enabled ?? true,
+      label: settings.dataCenter?.label ?? '数据中心',
+      url: settings.dataCenter?.url ?? '',
+      embed: {
+        search: settings.dataCenter?.embed?.search ?? false,
+        newButton: settings.dataCenter?.embed?.newButton ?? false,
+        appSwitcher: settings.dataCenter?.embed?.appSwitcher ?? false,
+      },
+    },
     knowledgeCenter: settings.knowledgeCenter ?? { enabled: true, label: '知识中心', url: '' },
     updatedAt: settings.updatedAt?.toISOString(),
     updatedBy: settings.updatedBy,

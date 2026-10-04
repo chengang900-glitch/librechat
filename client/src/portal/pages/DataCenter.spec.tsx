@@ -11,7 +11,11 @@ const mockAuth = {
 const mockPortal = {
   enabled: true,
   navigation: {
-    dataCenter: { url: `${window.location.origin}/metabase/`, label: 'Data workspace' },
+    dataCenter: {
+      url: `${window.location.origin}/metabase/`,
+      label: 'Data workspace',
+      embed: { search: false, newButton: false, appSwitcher: false },
+    },
   },
 };
 jest.mock('~/data-provider', () => ({
@@ -46,6 +50,11 @@ describe('Personal Metabase workspace', () => {
     mockAuth.isAuthenticated = true;
     mockAuth.logout.mockClear();
     mockPortal.navigation.dataCenter.url = `${window.location.origin}/metabase/`;
+    mockPortal.navigation.dataCenter.embed = {
+      search: false,
+      newButton: false,
+      appSwitcher: false,
+    };
     setFetch(async () => response(identity));
   });
 
@@ -69,6 +78,20 @@ describe('Personal Metabase workspace', () => {
       url.includes('/metabase/'),
     )[1];
     expect(mbOptions.headers).toBeUndefined();
+  });
+
+  it('adds only the administrator-selected Metabase toolbar parameters to the iframe', async () => {
+    mockPortal.navigation.dataCenter.embed = {
+      search: true,
+      newButton: true,
+      appSwitcher: true,
+    };
+    mount();
+    const frame = await screen.findByTitle('Data workspace');
+    expect(frame).toHaveAttribute(
+      'src',
+      `${window.location.origin}/metabase/?search=true&new_button=true&app_switcher=true`,
+    );
   });
 
   it('offers the login link when the Metabase session is missing', async () => {

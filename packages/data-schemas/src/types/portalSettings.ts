@@ -1,3 +1,4 @@
+import type { TPortalDataCenterEmbed } from 'librechat-data-provider';
 import type { Document } from 'mongoose';
 
 export interface IPortalSettings extends Document {
@@ -10,6 +11,7 @@ export interface IPortalSettings extends Document {
     enabled: boolean;
     label: string;
     url: string;
+    embed?: TPortalDataCenterEmbed;
   };
   knowledgeCenter: {
     enabled: boolean;

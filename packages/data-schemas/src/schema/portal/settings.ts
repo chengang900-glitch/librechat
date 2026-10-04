@@ -12,6 +12,11 @@ const portalSettingsSchema: Schema<IPortalSettings> = new Schema<IPortalSettings
       enabled: { type: Boolean, default: true },
       label: { type: String, default: '数据中心' },
       url: { type: String, required: true },
+      embed: {
+        search: { type: Boolean, default: false },
+        newButton: { type: Boolean, default: false },
+        appSwitcher: { type: Boolean, default: false },
+      },
     },
     knowledgeCenter: {
       enabled: { type: Boolean, default: true },

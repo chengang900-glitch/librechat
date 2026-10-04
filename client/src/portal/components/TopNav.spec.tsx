@@ -36,6 +36,7 @@ const config: TPortalStartupConfig = {
       label: '数据中心',
       url: 'https://data.example.com',
       mode: 'new_tab',
+      embed: { search: false, newButton: false, appSwitcher: false },
     },
     documentCenter: {
       label: '知识中心',

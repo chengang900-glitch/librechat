@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@librechat/client';
 import { Navigate } from 'react-router-dom';
+import type { TPortalDataCenterEmbed } from 'librechat-data-provider';
 import { useGetStartupConfig } from '~/data-provider';
 import { getDataCenterWorkspace } from '../workspace';
 import { useAuthContext } from '~/hooks/AuthContext';
@@ -17,6 +18,7 @@ export default function DataCenter() {
   const portal = configQuery.data?.portal;
   const owner = user?.id ?? '';
   const workspace = getDataCenterWorkspace(portal?.navigation.dataCenter.url)?.href;
+  const workspaceEmbed = buildDataCenterEmbedUrl(workspace, portal?.navigation.dataCenter.embed);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -89,7 +91,7 @@ export default function DataCenter() {
         <iframe
           key={owner}
           title={portal.navigation.dataCenter.label}
-          src={workspace}
+          src={workspaceEmbed}
           className="h-full min-h-0 w-full flex-1 border-0"
           referrerPolicy="same-origin"
         />
@@ -129,4 +131,16 @@ export default function DataCenter() {
       )}
     </main>
   );
+}
+
+function buildDataCenterEmbedUrl(
+  workspace: string | undefined,
+  embed: TPortalDataCenterEmbed | undefined,
+) {
+  if (!workspace) return undefined;
+  const url = new URL(workspace);
+  if (embed?.search) url.searchParams.set('search', 'true');
+  if (embed?.newButton) url.searchParams.set('new_button', 'true');
+  if (embed?.appSwitcher) url.searchParams.set('app_switcher', 'true');
+  return url.toString();
 }

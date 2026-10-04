@@ -27,6 +27,7 @@ describe('buildPortalStartupConfig', () => {
           label: '数据中心',
           url: 'http://metabase.internal:3000/',
           mode: 'new_tab',
+          embed: { search: false, newButton: false, appSwitcher: false },
         },
         documentCenter: {
           label: '知识中心',
@@ -41,13 +42,19 @@ describe('buildPortalStartupConfig', () => {
   it('uses persisted portal settings when provided', () => {
     const config = buildPortalStartupConfig(baseEnv, SystemRoles.ADMIN, {
       brand: { portalLogoUrl: '/images/portal/branding/portal-logo.webp?v=1' },
-      dataCenter: { enabled: true, label: '经营数据', url: 'https://data.example.com/' },
+      dataCenter: {
+        enabled: true,
+        label: '经营数据',
+        url: 'https://data.example.com/',
+        embed: { search: false, newButton: false, appSwitcher: false },
+      },
       knowledgeCenter: { enabled: true, label: '企业知识', url: 'https://knowledge.example.com/' },
     });
     expect(config?.brandLogoUrl).toContain('/images/portal/branding/portal-logo.webp');
     expect(config?.navigation.dataCenter).toMatchObject({
       label: '经营数据',
       url: 'https://data.example.com/',
+      embed: { search: false, newButton: false, appSwitcher: false },
     });
     expect(config?.navigation.documentCenter).toMatchObject({
       label: '企业知识',

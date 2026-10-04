@@ -17,7 +17,12 @@ const response = () => {
 
 const settings = {
   brand: {},
-  dataCenter: { enabled: true, label: '数据中心', url: 'https://data.example.com/' },
+  dataCenter: {
+    enabled: true,
+    label: '数据中心',
+    url: 'https://data.example.com/',
+    embed: { search: false, newButton: false, appSwitcher: false },
+  },
   knowledgeCenter: { enabled: true, label: '知识中心', url: 'https://knowledge.example.com/' },
 };
 
@@ -63,6 +68,41 @@ describe('portal settings handlers', () => {
     expect(result.statusCode).toBe(200);
     expect(update).toHaveBeenCalledWith({
       dataCenter: { enabled: true, label: '经营数据', url: 'http://127.0.0.1:3000/' },
+      updatedBy: 'admin',
+    });
+  });
+
+  it('persists the selected embedded Metabase toolbar controls', async () => {
+    const update = jest.fn(async (input) => ({ ...settings, ...input }));
+    const handlers = createPortalSettingsHandlers({
+      getPortalSettings: async () => settings,
+      updatePortalSettings: update,
+      brandingDir: '/tmp/portal-branding',
+      allowHttp: true,
+    });
+    const { result, res } = response();
+    await handlers.update(
+      {
+        body: {
+          dataCenter: {
+            enabled: true,
+            label: '经营数据',
+            url: 'http://127.0.0.1:3000/',
+            embed: { search: true, newButton: true, appSwitcher: true },
+          },
+        },
+        user: { id: 'admin' },
+      } as never,
+      res as never,
+    );
+    expect(result.statusCode).toBe(200);
+    expect(update).toHaveBeenCalledWith({
+      dataCenter: {
+        enabled: true,
+        label: '经营数据',
+        url: 'http://127.0.0.1:3000/',
+        embed: { search: true, newButton: true, appSwitcher: true },
+      },
       updatedBy: 'admin',
     });
   });
