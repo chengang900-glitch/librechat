@@ -95,5 +95,5 @@ export async function savePortalBranding(
   const temporary = `${target}.${randomUUID()}.tmp`;
   await fs.writeFile(temporary, output, { flag: 'wx' });
   await fs.rename(temporary, target);
-  return `/images/portal/branding/${filename}?v=${Date.now()}`;
+  return `/branding/${filename}?v=${Date.now()}`;
 }

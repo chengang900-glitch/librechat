@@ -327,9 +327,14 @@ export function createPortalMethods(mongoose: typeof import('mongoose')): Portal
   async function updatePortalSettings(
     input: UpdatePortalSettingsInput & { updatedBy: string },
   ): Promise<TPortalSettings> {
+    const { brand, ...rest } = input;
+    const fields: Record<string, unknown> = { ...rest, key: 'default' };
+    for (const [name, value] of Object.entries(brand ?? {})) {
+      if (value !== undefined) fields[`brand.${name}`] = value;
+    }
     const settings = await settingsModel().findOneAndUpdate(
       { key: 'default' },
-      { $set: { ...input, key: 'default' } },
+      { $set: fields },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
     return mapSettings(settings);

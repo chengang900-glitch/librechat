@@ -23,6 +23,7 @@ const emptyDataCenter: DataCenterForm = {
   embed: { search: false, newButton: false, appSwitcher: false },
 };
 const defaultLogoUrl = '/assets/portal/uhoo-logo.png';
+const defaultCompanyLogoUrl = '/assets/portal/company-logo.png';
 
 export default function PortalSettings() {
   const localize = useLocalize();
@@ -40,7 +41,7 @@ export default function PortalSettings() {
   useEffect(() => {
     const settings = settingsQuery.data;
     const portal = configQuery.data?.portal;
-    setCompanyLogoUrl(settings?.brand.companyLogoUrl ?? defaultLogoUrl);
+    setCompanyLogoUrl(settings?.brand.companyLogoUrl ?? defaultCompanyLogoUrl);
     setPortalLogoUrl(settings?.brand.portalLogoUrl ?? defaultLogoUrl);
     setDataCenter(
       settings?.dataCenter?.url
@@ -74,7 +75,7 @@ export default function PortalSettings() {
     form.append('logo', file);
     try {
       const result = await mutations.uploadLogo.mutateAsync({ type, input: form });
-      setCompanyLogoUrl(result.brand.companyLogoUrl ?? defaultLogoUrl);
+      setCompanyLogoUrl(result.brand.companyLogoUrl ?? defaultCompanyLogoUrl);
       setPortalLogoUrl(result.brand.portalLogoUrl ?? defaultLogoUrl);
       setSaved(true);
     } catch (value) {
@@ -88,14 +89,10 @@ export default function PortalSettings() {
     setSaved(false);
     try {
       const result = await mutations.updateSettings.mutateAsync({
-        brand: {
-          companyLogoUrl: companyLogoUrl || undefined,
-          portalLogoUrl: portalLogoUrl || undefined,
-        },
         dataCenter,
         knowledgeCenter,
       });
-      setCompanyLogoUrl(result.brand.companyLogoUrl ?? defaultLogoUrl);
+      setCompanyLogoUrl(result.brand.companyLogoUrl ?? defaultCompanyLogoUrl);
       setPortalLogoUrl(result.brand.portalLogoUrl ?? defaultLogoUrl);
       setSaved(true);
     } catch (value) {

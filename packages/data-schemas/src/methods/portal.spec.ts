@@ -151,6 +151,19 @@ describe('portal data methods', () => {
     );
     expect((await methods.getPortalSettings())?.brand.portalLogoUrl).toContain('portal-logo.webp');
 
+    await methods.updatePortalSettings({
+      brand: { companyLogoUrl: '/branding/company-logo.webp?v=2' },
+      updatedBy: 'admin',
+    });
+    expect((await methods.getPortalSettings())?.brand.portalLogoUrl).toContain('portal-logo.webp');
+    await methods.updatePortalSettings({
+      brand: { portalLogoUrl: '/branding/portal-logo.webp?v=2' },
+      updatedBy: 'admin',
+    });
+    expect((await methods.getPortalSettings())?.brand.companyLogoUrl).toBe(
+      '/branding/company-logo.webp?v=2',
+    );
+
     await mongoose.models.PortalSettings.updateOne(
       { key: 'default' },
       {
