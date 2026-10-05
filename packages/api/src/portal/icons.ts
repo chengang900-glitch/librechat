@@ -67,7 +67,7 @@ export async function removePortalIcon(
 export async function savePortalBranding(
   file: PortalUpload,
   brandingDir: string,
-  type: 'portal' | 'login',
+  type: 'company' | 'portal',
 ): Promise<string> {
   if (file.size > 1_048_576) throw new PortalIconError('Logo must not exceed 1 MB');
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {

@@ -4,7 +4,9 @@ import type { Document } from 'mongoose';
 export interface IPortalSettings extends Document {
   key: 'default';
   brand: {
+    companyLogoUrl?: string;
     portalLogoUrl?: string;
+    /** Legacy field retained so existing settings can migrate safely. */
     loginLogoUrl?: string;
   };
   dataCenter: {

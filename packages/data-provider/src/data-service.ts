@@ -1704,7 +1704,7 @@ export function updatePortalAdminSettings(
 }
 
 export function uploadPortalLogo(
-  type: 'portal' | 'login',
+  type: 'company' | 'portal',
   input: FormData,
 ): Promise<TPortalSettings> {
   return request.postMultiPart(endpoints.portalAdminLogo(type), input);

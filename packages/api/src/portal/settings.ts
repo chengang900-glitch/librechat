@@ -20,8 +20,8 @@ const urlSchema = z
 const settingsSchema = z.object({
   brand: z
     .object({
+      companyLogoUrl: z.string().trim().max(512).optional(),
       portalLogoUrl: z.string().trim().max(512).optional(),
-      loginLogoUrl: z.string().trim().max(512).optional(),
     })
     .optional(),
   dataCenter: z
@@ -113,7 +113,7 @@ export function createPortalSettingsHandlers(deps: SettingsDeps): PortalSettings
 
   async function uploadLogo(req: UploadRequest, res: Response) {
     const type = (req.params as { type?: string }).type;
-    if (type !== 'portal' && type !== 'login') {
+    if (type !== 'portal' && type !== 'company') {
       return res.status(400).json({ error: 'Logo type is invalid' });
     }
     if (!req.file) return res.status(400).json({ error: 'Logo file is required' });
@@ -121,7 +121,7 @@ export function createPortalSettingsHandlers(deps: SettingsDeps): PortalSettings
       const url = await savePortalBranding(req.file, deps.brandingDir, type);
       return res.status(200).json(
         await deps.updatePortalSettings({
-          brand: { [type === 'portal' ? 'portalLogoUrl' : 'loginLogoUrl']: url },
+          brand: { [type === 'portal' ? 'portalLogoUrl' : 'companyLogoUrl']: url },
           updatedBy: userId(req),
         }),
       );

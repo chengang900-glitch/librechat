@@ -49,8 +49,8 @@ export type TPortalStartupConfig = {
 
 export type TPortalSettings = {
   brand: {
+    companyLogoUrl?: string;
     portalLogoUrl?: string;
-    loginLogoUrl?: string;
   };
   dataCenter: {
     enabled: boolean;
@@ -69,8 +69,8 @@ export type TPortalSettings = {
 
 export type UpdatePortalSettingsInput = {
   brand?: {
+    companyLogoUrl?: string;
     portalLogoUrl?: string;
-    loginLogoUrl?: string;
   };
   dataCenter?: Partial<Omit<TPortalSettings['dataCenter'], 'embed'>> & {
     embed?: Partial<TPortalDataCenterEmbed>;

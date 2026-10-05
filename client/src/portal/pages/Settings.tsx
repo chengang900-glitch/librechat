@@ -30,8 +30,8 @@ export default function PortalSettings() {
   const settingsQuery = usePortalAdminSettings(configQuery.data?.portal?.canManage === true);
   const catalog = usePortalAdminCatalog(configQuery.data?.portal?.canManage === true);
   const mutations = usePortalAdminMutations();
+  const [companyLogoUrl, setCompanyLogoUrl] = useState('');
   const [portalLogoUrl, setPortalLogoUrl] = useState('');
-  const [loginLogoUrl, setLoginLogoUrl] = useState('');
   const [dataCenter, setDataCenter] = useState<DataCenterForm>(emptyDataCenter);
   const [knowledgeCenter, setKnowledgeCenter] = useState<ServiceForm>(emptyService);
   const [error, setError] = useState('');
@@ -40,8 +40,8 @@ export default function PortalSettings() {
   useEffect(() => {
     const settings = settingsQuery.data;
     const portal = configQuery.data?.portal;
+    setCompanyLogoUrl(settings?.brand.companyLogoUrl ?? defaultLogoUrl);
     setPortalLogoUrl(settings?.brand.portalLogoUrl ?? defaultLogoUrl);
-    setLoginLogoUrl(settings?.brand.loginLogoUrl ?? defaultLogoUrl);
     setDataCenter(
       settings?.dataCenter?.url
         ? settings.dataCenter
@@ -67,15 +67,15 @@ export default function PortalSettings() {
   if (!configQuery.data?.portal?.enabled) return <Navigate to="/c/new" replace />;
   if (!configQuery.data.portal.canManage) return <Navigate to="/portal/apps" replace />;
 
-  const uploadLogo = async (type: 'portal' | 'login', file?: File) => {
+  const uploadLogo = async (type: 'company' | 'portal', file?: File) => {
     if (!file) return;
     setError('');
     const form = new FormData();
     form.append('logo', file);
     try {
       const result = await mutations.uploadLogo.mutateAsync({ type, input: form });
+      setCompanyLogoUrl(result.brand.companyLogoUrl ?? defaultLogoUrl);
       setPortalLogoUrl(result.brand.portalLogoUrl ?? defaultLogoUrl);
-      setLoginLogoUrl(result.brand.loginLogoUrl ?? defaultLogoUrl);
       setSaved(true);
     } catch (value) {
       setError(value instanceof Error ? value.message : String(value));
@@ -89,14 +89,14 @@ export default function PortalSettings() {
     try {
       const result = await mutations.updateSettings.mutateAsync({
         brand: {
+          companyLogoUrl: companyLogoUrl || undefined,
           portalLogoUrl: portalLogoUrl || undefined,
-          loginLogoUrl: loginLogoUrl || undefined,
         },
         dataCenter,
         knowledgeCenter,
       });
+      setCompanyLogoUrl(result.brand.companyLogoUrl ?? defaultLogoUrl);
       setPortalLogoUrl(result.brand.portalLogoUrl ?? defaultLogoUrl);
-      setLoginLogoUrl(result.brand.loginLogoUrl ?? defaultLogoUrl);
       setSaved(true);
     } catch (value) {
       setError(value instanceof Error ? value.message : String(value));
@@ -132,15 +132,15 @@ export default function PortalSettings() {
             </h2>
             <div className="grid gap-5 md:grid-cols-2">
               <LogoField
-                label={localize('com_portal_portal_logo')}
-                url={portalLogoUrl}
-                onChange={(file) => uploadLogo('portal', file)}
+                label={localize('com_portal_company_logo')}
+                url={companyLogoUrl}
+                onChange={(file) => uploadLogo('company', file)}
                 emptyLabel={localize('com_portal_default_logo')}
               />
               <LogoField
-                label={localize('com_portal_login_logo')}
-                url={loginLogoUrl}
-                onChange={(file) => uploadLogo('login', file)}
+                label={localize('com_portal_portal_logo')}
+                url={portalLogoUrl}
+                onChange={(file) => uploadLogo('portal', file)}
                 emptyLabel={localize('com_portal_default_logo')}
               />
             </div>

@@ -80,7 +80,7 @@ export const usePortalAdminMutations = () => {
     { mutationKey: [MutationKeys.portalAdmin, 'updateSettings'], onSuccess: refresh },
   );
   const uploadLogo = useMutation(
-    ({ type, input }: { type: 'portal' | 'login'; input: FormData }) =>
+    ({ type, input }: { type: 'company' | 'portal'; input: FormData }) =>
       dataService.uploadPortalLogo(type, input),
     { mutationKey: [MutationKeys.portalAdmin, 'uploadLogo'], onSuccess: refresh },
   );

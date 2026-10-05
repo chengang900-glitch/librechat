@@ -52,6 +52,7 @@ const endpoints = [
   ['delete', '/apps/app-id'],
   ['get', '/settings'],
   ['put', '/settings'],
+  ['post', '/settings/logo/company'],
   ['post', '/settings/logo/portal'],
 ];
 

@@ -5,7 +5,9 @@ const portalSettingsSchema: Schema<IPortalSettings> = new Schema<IPortalSettings
   {
     key: { type: String, enum: ['default'], unique: true, default: 'default' },
     brand: {
+      companyLogoUrl: { type: String },
       portalLogoUrl: { type: String },
+      // Keep the old field readable while existing singleton documents migrate.
       loginLogoUrl: { type: String },
     },
     dataCenter: {

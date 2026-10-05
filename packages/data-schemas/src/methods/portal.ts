@@ -298,7 +298,12 @@ export function createPortalMethods(mongoose: typeof import('mongoose')): Portal
   }
 
   const mapSettings = (settings: IPortalSettings): TPortalSettings => ({
-    brand: settings.brand ?? {},
+    brand: {
+      ...(settings.brand?.companyLogoUrl || settings.brand?.loginLogoUrl
+        ? { companyLogoUrl: settings.brand.companyLogoUrl ?? settings.brand.loginLogoUrl }
+        : {}),
+      ...(settings.brand?.portalLogoUrl ? { portalLogoUrl: settings.brand.portalLogoUrl } : {}),
+    },
     dataCenter: {
       enabled: settings.dataCenter?.enabled ?? true,
       label: settings.dataCenter?.label ?? '数据中心',

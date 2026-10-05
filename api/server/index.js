@@ -364,14 +364,30 @@ const startServer = async () => {
   app.use(staticCache(appConfig.paths.dist));
   app.use(staticCache(appConfig.paths.fonts));
   app.use(staticCache(appConfig.paths.assets));
+  for (const logoName of ['company-logo.webp', 'portal-logo.webp']) {
+    app.get(`/branding/${logoName}`, (_req, res, next) => {
+      const uploadedLogo = path.join(appConfig.paths.imageOutput, 'portal', 'branding', logoName);
+      if (fs.existsSync(uploadedLogo)) return next();
+      if (logoName === 'company-logo.webp') {
+        const legacyLogo = path.join(
+          appConfig.paths.imageOutput,
+          'portal',
+          'branding',
+          'login-logo.webp',
+        );
+        if (fs.existsSync(legacyLogo)) return res.sendFile(legacyLogo);
+      }
+      return res.sendStatus(404);
+    });
+  }
   app.get('/branding/login-logo.webp', (_req, res, next) => {
-    const uploadedLogo = path.join(
+    const legacyLogo = path.join(
       appConfig.paths.imageOutput,
       'portal',
       'branding',
       'login-logo.webp',
     );
-    if (fs.existsSync(uploadedLogo)) return next();
+    if (fs.existsSync(legacyLogo)) return next();
     return res.sendFile(path.join(appConfig.paths.assets, 'portal', 'uhoo-logo.png'));
   });
   app.use(

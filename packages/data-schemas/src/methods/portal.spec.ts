@@ -137,13 +137,28 @@ describe('portal data methods', () => {
 
   it('persists portal settings as a singleton and returns plain settings', async () => {
     const saved = await methods.updatePortalSettings({
-      brand: { portalLogoUrl: '/images/portal/branding/portal-logo.webp?v=1' },
+      brand: {
+        companyLogoUrl: '/images/portal/branding/company-logo.webp?v=1',
+        portalLogoUrl: '/images/portal/branding/portal-logo.webp?v=1',
+      },
       dataCenter: { enabled: true, label: '经营数据', url: 'https://data.example.com/' },
       knowledgeCenter: { enabled: true, label: '企业知识', url: 'https://knowledge.example.com/' },
       updatedBy: 'admin',
     });
     expect(saved.dataCenter.label).toBe('经营数据');
+    expect((await methods.getPortalSettings())?.brand.companyLogoUrl).toContain(
+      'company-logo.webp',
+    );
     expect((await methods.getPortalSettings())?.brand.portalLogoUrl).toContain('portal-logo.webp');
+
+    await mongoose.models.PortalSettings.updateOne(
+      { key: 'default' },
+      {
+        $unset: { 'brand.companyLogoUrl': 1 },
+        $set: { 'brand.loginLogoUrl': '/images/portal/branding/legacy-logo.webp?v=1' },
+      },
+    );
+    expect((await methods.getPortalSettings())?.brand.companyLogoUrl).toContain('legacy-logo.webp');
 
     const updated = await methods.updatePortalSettings({
       dataCenter: { enabled: false, label: '经营数据', url: 'https://data.example.com/' },
