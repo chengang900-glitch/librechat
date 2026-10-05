@@ -1502,5 +1502,22 @@
   "com_portal_no_favorites": "您还没有收藏应用。",
   "com_portal_search_placeholder": "搜索应用",
   "com_portal_sort_order": "排序值",
-  "com_portal_url": "应用链接"
+  "com_portal_url": "应用链接",
+  "com_portal_system_settings": "系统设置",
+  "com_portal_portal_settings": "门户设置",
+  "com_portal_settings_description": "配置门户标识、数据中心及知识中心访问地址。",
+  "com_portal_settings_saved": "门户设置已保存。",
+  "com_portal_brand_settings": "企业标识设置",
+  "com_portal_portal_logo": "门户标识",
+  "com_portal_login_logo": "登录页标识",
+  "com_portal_data_center_settings": "数据中心设置",
+  "com_portal_data_center_embed_settings": "嵌入式 Metabase 工具栏",
+  "com_portal_data_center_embed_search": "显示搜索框",
+  "com_portal_data_center_embed_new": "显示“新建”按钮",
+  "com_portal_data_center_embed_app_switcher": "显示设置和应用切换菜单",
+  "com_portal_knowledge_center_settings": "知识中心设置",
+  "com_portal_save_settings": "保存设置",
+  "com_portal_default_logo": "默认标识",
+  "com_portal_setting_name": "名称",
+  "com_portal_setting_address": "访问地址"
 }

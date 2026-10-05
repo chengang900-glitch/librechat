@@ -110,6 +110,20 @@ describe('i18next translation tests', () => {
     expect(SimplifiedChinese.com_ui_new_chat).toBe('新对话');
   });
 
+  it('should translate every portal key in simplified Chinese without falling back to English', async () => {
+    await changeLanguageSafely('zh-CN');
+    const chinese = SimplifiedChinese as Record<string, string>;
+    const portalEntries = Object.entries(English).filter(([key]) => key.startsWith('com_portal_'));
+
+    for (const [key, english] of portalEntries) {
+      expect(chinese[key]).toBeDefined();
+      expect(chinese[key]).not.toBe(english);
+      expect(i18n.t(key as TranslationKeys)).toBe(chinese[key]);
+    }
+    expect(i18n.t('com_portal_system_settings')).toBe('系统设置');
+    expect(i18n.t('com_portal_portal_settings')).toBe('门户设置');
+  });
+
   it('should normalize language selector values to locale files', () => {
     expect(normalizeLocale('en-US')).toBe('en');
     expect(normalizeLocale('de-DE')).toBe('de');
