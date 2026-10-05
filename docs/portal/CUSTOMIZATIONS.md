@@ -385,3 +385,10 @@ Portal 镜像回滚使用上一个 Portal 标签；完全回到原生 LibreChat 
 - 完整浏览器企业 SSO 操作未在本次验收；Lighthouse 因测试脚本未找到英文注册入口而未通过。
 - 部署基于当前运行镜像构建增量版本，仅重建 LibreChat，保留全部 9 层 Compose 和旧镜像。
 - 详细验收与回退：[应用中心权限部署验收](ACCEPTANCE-2026-10-02-LIBRECHAT-PORTAL-ADMIN-ONLY.md)。
+
+## 13. 2026-10-06 应用卡片上传图标目录权限
+
+- 现象：应用卡片上传图标回退为首字默认图标；服务端 `/images/portal/*` 路由和图标文件仍存在。
+- 根因：LibreChat 容器以 `node`（UID 1000）运行时，宿主机图标父目录若为 `root:root 750`，容器用户无法穿过父目录读取或写入图标。
+- 部署要求：`/srv/enterprise-ai/data/librechat/images` 使用 755；`images/portal` 使用 UID 1000 所属、755；已有 WebP 文件使用 644。应用图标请求继续通过认证 Blob 链路读取，不能放开匿名访问。
+- 已验证：容器内运行用户可读取历史图标并写入新图标；未认证直接请求 `/images/portal/<icon>.webp` 仍返回 401。
