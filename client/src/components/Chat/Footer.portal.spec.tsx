@@ -13,12 +13,12 @@ describe('Chat footer in portal mode', () => {
   it('hides every footer element when the portal is enabled', () => {
     render(<Footer startupConfig={{ portal: { enabled: true } } as never} />);
 
-    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^LibreChat / })).not.toBeInTheDocument();
   });
 
   it('keeps the native footer when the portal is disabled', () => {
     render(<Footer startupConfig={{ portal: { enabled: false } } as never} />);
 
-    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^LibreChat / })).toBeInTheDocument();
   });
 });

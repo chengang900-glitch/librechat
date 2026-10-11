@@ -16,6 +16,7 @@ jest.mock('~/server/services/Config', () => ({
       dist: '/tmp/dist',
       fonts: '/tmp/fonts',
       assets: '/tmp/assets',
+      imageOutput: '/tmp/images',
     },
     fileStrategy: 'local',
     imageOutputType: 'PNG',
