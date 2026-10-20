@@ -13,6 +13,7 @@ import {
   PortalApps,
   PortalDataCenter,
   PortalKnowledgeCenter,
+  PortalProcessAssets,
   PortalSettings,
 } from '~/portal';
 import { MarketplaceProvider } from '~/components/Agents/MarketplaceContext';
@@ -157,6 +158,10 @@ export const router = createBrowserRouter(
             {
               path: 'portal/knowledge',
               element: <PortalKnowledgeCenter />,
+            },
+            {
+              path: 'portal/process',
+              element: <PortalProcessAssets />,
             },
             {
               path: 'portal/admin/groups',

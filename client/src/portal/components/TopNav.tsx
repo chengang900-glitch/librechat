@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Skeleton } from '@librechat/client';
-import { BarChart3, BookOpen, Brain, LayoutGrid } from 'lucide-react';
+import { BarChart3, BookOpen, Brain, LayoutGrid, Workflow } from 'lucide-react';
 import type { TPortalStartupConfig } from 'librechat-data-provider';
 import { getDataCenterWorkspace } from '../workspace';
 import { useAuthContext } from '~/hooks/AuthContext';
@@ -53,6 +53,11 @@ export default function PortalTopNav({ config }: { config: TPortalStartupConfig 
         >
           <Brain className="h-[18px] w-[18px]" aria-hidden="true" />
           <span className="hidden sm:inline">{config.navigation.assistant.label}</span>
+        </NavLink>
+        {/** 演示用：嵌入的流程资产原型页面，不参与门户设置持久化 */}
+        <NavLink to="/portal/process" className={internalClass} aria-label="流程资产">
+          <Workflow className="h-[18px] w-[18px]" aria-hidden="true" />
+          <span className="hidden sm:inline">流程资产</span>
         </NavLink>
         {config.navigation.dataCenter.enabled !== false && (
           <NavLink

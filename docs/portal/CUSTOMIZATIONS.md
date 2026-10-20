@@ -2,9 +2,19 @@
 
 > 用途：本文件是 LibreChat 升级时迁移企业门户定制的唯一入口。实施新定制后必须同步更新本文件，不得记录密码、Token、Cookie 或 `.env` 内容。
 
-## 当前知识中心方案（2026-10-02）
+## 当前源码与运行基线（2026-10-20）
 
-- 当前代码基于 `v0.8.8-rc4`，分支为 `enterprise-ai/portal-v0.8.8-rc4`；下文旧基线和历次上线记录仅为历史记录。
+- 定制分支为 `enterprise-ai/portal-v0.8.8`，后端基线提交为 `55c63d735d3478fec776d286f367ff864534bc03`。
+- 当前 demo 环境运行镜像为 `enterprise-ai/librechat:v0.8.8-portal.12-process-assets-20261016`，镜像 ID 为 `sha256:bb0d65fdc6157f363c2cfaf5a0e4cd03f9b103b6b1358f300452de83178be064`。它在上述基线上派生，替换了流程资产演示所需的前端产物。
+- 本分支已包含第 14 节的完整演示源码，包括静态 HTML、React 页面、顶栏、路由和测试。不能只检出后端基线提交来恢复完整当前前端。
+- 运行容器中的 `BUILD_COMMIT` 仍标记后端基线；核对源码时同时记录本分支实际 Git 提交、镜像 ID 和前端增量。此次源码入库不重建或升级应用镜像。
+- 原型 HTML 的 SHA-256 为 `1d7f2f0a73a94e38d220acbfbfa88327dd69fba0cdf8343e4674708ec0e97bea`，2026-10-20 与运行容器文件核对一致。它是演示原型，不提供正式流程资产后端授权或持久化能力。
+- 当前数据中心已有 Metabase 同源嵌入和 issuer/subject 一致性检查；旧章节中“始终新页签”的描述只代表早期实现。当前行为以 `DataCenter.tsx`、`workspace.ts` 和对应测试为准。
+- 下列旧版本章节保留为迁移审计记录，不代表当前运行版本。部署使用当前运行容器和最新发布记录，不直接复用历史命令。
+
+## 知识中心方案记录（2026-10-02，历史）
+
+- 当时的代码基于 `v0.8.8-rc4`，分支为 `enterprise-ai/portal-v0.8.8-rc4`；不代表本文顶部的当前基线。
 - `/portal/knowledge` 保留为知识中心入口，按线上 `portal.4-weknora-embed` 方案直接嵌入 `PORTAL_DOCUMENT_CENTER_URL` 指定的 WeKnora 页面。同源且不含凭据的 URL 使用 iframe，跨源配置使用外部链接。
 - 知识库、文档、Wiki、问答以及知识权限由 WeKnora 自身负责，不再在 LibreChat 内重复实现或判断 `knowledge-readers` / `knowledge-maintainers`。
 - 已移除旧知识中心定制页面、演示知识页面、`/api/portal/knowledge` BFF、客户端专用契约和收藏/最近访问/问答会话模型。此入口不再调用这些专用 API。
@@ -15,7 +25,7 @@
 - 本地验证：共享包和生产前端构建通过；四个变更工作区 `tsc --noEmit` 通过；嵌入页、顶栏、启动配置、应用请求、URL 校验和应用目录/收藏共 24 项针对性测试通过。
 - 验证边界：通用 `/api/config` 套件原有 5 项能力调用次数断言失败，已用上一版路由复现相同失败。本次未处理无关断言；Lighthouse 在注册前置步骤等待 `Sign up` 超时，未生成性能验收结果；未执行生产 SSO/WeKnora 操作验收。
 
-## 1. 基线与边界
+## 1. 初始基线与边界（历史）
 
 - 上游基线：LibreChat `v0.8.7`，提交 `9e74cc0e57b395926122bd4062c1fcedc48ed465`。
 - 定制分支：`enterprise-ai/portal-v1`。
@@ -392,3 +402,21 @@ Portal 镜像回滚使用上一个 Portal 标签；完全回到原生 LibreChat 
 - 根因：LibreChat 容器以 `node`（UID 1000）运行时，宿主机图标父目录若为 `root:root 750`，容器用户无法穿过父目录读取或写入图标。
 - 部署要求：`/srv/enterprise-ai/data/librechat/images` 使用 755；`images/portal` 使用 UID 1000 所属、755；已有 WebP 文件使用 644。应用图标请求继续通过认证 Blob 链路读取，不能放开匿名访问。
 - 已验证：容器内运行用户可读取历史图标并写入新图标；未认证直接请求 `/images/portal/<icon>.webp` 仍返回 401。
+
+## 14. 2026-10-16 流程资产演示页签（顶栏嵌入原型）
+
+- 需求边界：**仅用于演示**。把设计原型 `【流程资产】企业AI门户v2.1.html` 的「流程资产」页签作为门户顶栏第 2 项（AI 工作台之后）展示，不接入真实流程数据，也不替代正在开发的流程资产模块。
+- 新增 `client/public/assets/portal/process-assets.html`：原型单文件副本，仅做三处改动——① 在 `</body>` 前注入 `embed=1` 模式（`body.portal-embed` 隐藏 `.topbar`、`--header-h` 归零、`.workspace` 占满视口，并调用 `switchPage('process')` 直接进入流程资产页）；② 左栏标题「演示身份」改为「角色切换」；③ `renderIdentitySwitcher` 按角色去重，下拉选项只显示角色名（超级管理员 / 流程运营人员 / 使用用户），默认仍为超级管理员。
+- 新增 `client/src/portal/pages/ProcessAssets.tsx`，以 iframe 加载 `/assets/portal/process-assets.html?embed=1`，沿用知识中心页的 `portal.enabled` 判断与加载态。
+- 新增路由 `portal/process`（`client/src/routes/index.tsx`），顶栏入口在 `client/src/portal/components/TopNav.tsx`。**该入口为演示项，硬编码在客户端，未纳入 `TPortalStartupConfig`，因此不出现在门户管理页，也不随门户设置持久化。** 如需正式化，应改为经 `buildPortalStartupConfig` 下发并同步重建 `packages/api`。
+- 升级迁移：本项只影响 `client/`（含 `client/public`），迁移时需同时搬运静态原型文件、页面、路由与顶栏入口；`TopNav.spec.tsx` 的顶栏项数量断言已由 4 项改为 5 项。
+- 回滚：删除 `process-assets.html`、`ProcessAssets.tsx`、`portal/process` 路由与顶栏 `NavLink`，并把 `TopNav.spec.tsx` 断言改回 4 项。
+
+## 15. 2026-10-20 当前源码归档与启动引用修复
+
+- 流程资产演示的页面、静态 HTML、顶栏、路由、导出和测试一同入库；保留原型内容，未接入正式业务数据。
+- demo 环境 LibreChat 的 Compose 链去除了备份目录内无实际增量的运行基线和重复末层，从 13 项变为 11 项；完整合并配置比较相等。
+- WeKnora 和独立 Draw.io 的路径应用/代理改为引用 `/srv/enterprise-ai/config/` 中的持久配置。认证参数保留运行态原值，未写入本仓库。
+- 持久操作入口为服务器上的 `/srv/enterprise-ai/ops/runtime-handover-20261020/compose.py`，支持 `librechat`、`weknora-path`、`drawio-path` 三个明确配置组合。含敏感值的现场备份仅保留在服务器受限目录。
+- 修复前后四个受影响容器的镜像、环境、挂载、网络及安全/资源等运行参数一致，其他 41 个容器 ID 未变。门户、就绪接口、原型资源及现用应用匿名入口复核通过。
+- 本地验证：Portal 5 个套件 / 26 项通过，客户端 TypeScript 检查通过，生产前端构建通过，原型内联 JavaScript 语法检查通过。本次未执行带账号的完整 SSO 和业务写入 UAT，不将匿名 200/302 当作业务验收。

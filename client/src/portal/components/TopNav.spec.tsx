@@ -52,7 +52,7 @@ describe('PortalTopNav', () => {
     mockLogout.mockClear();
   });
 
-  it('centers four icon menus and places the account menu on the right', async () => {
+  it('centers five icon menus and places the account menu on the right', async () => {
     render(
       <MemoryRouter initialEntries={['/c/new']}>
         <PortalTopNav config={config} />
@@ -73,9 +73,14 @@ describe('PortalTopNav', () => {
       'leading-none',
     );
     expect(screen.getByText('AI工作台')).toBeInTheDocument();
+    expect(screen.getByText('流程资产')).toBeInTheDocument();
     expect(screen.getByText('数据中心')).toBeInTheDocument();
     expect(screen.getByText('知识中心')).toBeInTheDocument();
     expect(screen.getByText('应用中心')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '流程资产' })).toHaveAttribute(
+      'href',
+      '/portal/process',
+    );
     expect(screen.getByRole('link', { name: /数据中心/ })).toHaveAttribute('href', '/portal/data');
     expect(screen.getByRole('link', { name: /知识中心/ })).toHaveAttribute(
       'href',
@@ -89,7 +94,7 @@ describe('PortalTopNav', () => {
       'aria-label',
       '应用中心',
     );
-    expect(screen.getByTestId('portal-primary-nav').querySelectorAll('svg')).toHaveLength(4);
+    expect(screen.getByTestId('portal-primary-nav').querySelectorAll('svg')).toHaveLength(5);
     expect(await screen.findByTestId('top-account-settings')).toHaveAttribute(
       'data-placement',
       'topbar',
