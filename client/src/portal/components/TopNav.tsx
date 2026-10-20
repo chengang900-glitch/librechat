@@ -5,10 +5,14 @@ import { BarChart3, BookOpen, Brain, LayoutGrid, Workflow } from 'lucide-react';
 import type { TPortalStartupConfig } from 'librechat-data-provider';
 import { getDataCenterWorkspace } from '../workspace';
 import { useAuthContext } from '~/hooks/AuthContext';
+import useLocalize from '~/hooks/useLocalize';
 
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
 export default function PortalTopNav({ config }: { config: TPortalStartupConfig }) {
+  const localize = useLocalize();
+  // The embedded prototype is a Chinese-only demo, matching its current deployment.
+  const processAssetsLabel = localize('com_ui_portal_process_assets_demo');
   const { logout } = useAuthContext();
   const workspace = getDataCenterWorkspace(config.navigation.dataCenter.url)?.href;
   const portalLogout = useCallback(async () => {
@@ -55,9 +59,9 @@ export default function PortalTopNav({ config }: { config: TPortalStartupConfig 
           <span className="hidden sm:inline">{config.navigation.assistant.label}</span>
         </NavLink>
         {/** 演示用：嵌入的流程资产原型页面，不参与门户设置持久化 */}
-        <NavLink to="/portal/process" className={internalClass} aria-label="流程资产">
+        <NavLink to="/portal/process" className={internalClass} aria-label={processAssetsLabel}>
           <Workflow className="h-[18px] w-[18px]" aria-hidden="true" />
-          <span className="hidden sm:inline">流程资产</span>
+          <span className="hidden sm:inline">{processAssetsLabel}</span>
         </NavLink>
         {config.navigation.dataCenter.enabled !== false && (
           <NavLink

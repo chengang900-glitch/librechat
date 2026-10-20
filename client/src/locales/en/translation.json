@@ -1,4 +1,5 @@
 {
+  "com_ui_portal_process_assets_demo": "流程资产",
   "com_ui_portal_data_auth": "Sign in with your personal account",
   "com_ui_portal_data_unavailable": "The data workspace is unavailable. Retry or contact your administrator.",
   "com_ui_portal_data_retry": "Retry",

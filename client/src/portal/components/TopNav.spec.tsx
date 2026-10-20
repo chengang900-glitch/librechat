@@ -9,6 +9,11 @@ jest.mock('~/hooks/AuthContext', () => ({
   useAuthContext: () => ({ logout: mockLogout }),
 }));
 
+jest.mock('~/hooks/useLocalize', () => ({
+  __esModule: true,
+  default: () => (key: string) => (key === 'com_ui_portal_process_assets_demo' ? '流程资产' : key),
+}));
+
 jest.mock('~/components/Nav/AccountSettings', () => ({
   __esModule: true,
   default: ({

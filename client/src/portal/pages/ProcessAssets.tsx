@@ -35,7 +35,7 @@ export default function ProcessAssets() {
           </p>
         )}
         <iframe
-          title="流程资产"
+          title={localize('com_ui_portal_process_assets_demo')}
           src={PROCESS_ASSETS_URL}
           className="h-full w-full border-0"
           referrerPolicy="same-origin"
