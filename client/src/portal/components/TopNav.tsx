@@ -58,11 +58,6 @@ export default function PortalTopNav({ config }: { config: TPortalStartupConfig 
           <Brain className="h-[18px] w-[18px]" aria-hidden="true" />
           <span className="hidden sm:inline">{config.navigation.assistant.label}</span>
         </NavLink>
-        {/** 演示用：嵌入的流程资产原型页面，不参与门户设置持久化 */}
-        <NavLink to="/portal/process" className={internalClass} aria-label={processAssetsLabel}>
-          <Workflow className="h-[18px] w-[18px]" aria-hidden="true" />
-          <span className="hidden sm:inline">{processAssetsLabel}</span>
-        </NavLink>
         {config.navigation.dataCenter.enabled !== false && (
           <NavLink
             to="/portal/data"
@@ -83,6 +78,11 @@ export default function PortalTopNav({ config }: { config: TPortalStartupConfig 
             <span className="hidden sm:inline">{config.navigation.documentCenter.label}</span>
           </NavLink>
         )}
+        {/** 演示用：嵌入的流程资产原型页面，不参与门户设置持久化 */}
+        <NavLink to="/portal/process" className={internalClass} aria-label={processAssetsLabel}>
+          <Workflow className="h-[18px] w-[18px]" aria-hidden="true" />
+          <span className="hidden sm:inline">{processAssetsLabel}</span>
+        </NavLink>
         <NavLink
           to={config.navigation.appCenter.path}
           className={internalClass}

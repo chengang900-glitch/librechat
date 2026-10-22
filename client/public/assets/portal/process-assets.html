@@ -510,6 +510,23 @@
     .proc-filter-bar input, .proc-filter-bar select { height:38px; border:1px solid var(--ink-200); border-radius:10px; padding:0 12px; background:white; color:var(--ink-700); }
     .proc-filter-bar input { min-width:190px; flex:1; }
     .proc-table-wrap { border:1px solid var(--ink-200); border-radius:var(--radius); overflow:hidden; background:#fff; }
+    .process-step-wrap { overflow-x:auto; }
+    .process-step-table { min-width:1750px; table-layout:fixed; }
+    .process-step-table th, .process-step-table td { vertical-align:top; line-height:1.55; }
+    .process-step-table th:nth-child(1) { width:75px; }
+    .process-step-table th:nth-child(2) { width:140px; }
+    .process-step-table th:nth-child(3) { width:230px; }
+    .process-step-table th:nth-child(4), .process-step-table th:nth-child(5) { width:170px; }
+    .process-step-table th:nth-child(6) { width:110px; }
+    .process-step-table th:nth-child(7) { width:130px; }
+    .process-step-table th:nth-child(8) { width:85px; }
+    .process-step-table th:nth-child(9) { width:180px; }
+    .process-step-table th:nth-child(10) { width:110px; }
+    .process-step-table th:nth-child(11) { width:105px; }
+    .process-step-table th:nth-child(12) { width:150px; }
+    .process-step-table th:nth-child(13) { width:70px; }
+    .process-step-cell { display:block; white-space:pre-line; overflow-wrap:anywhere; }
+    .process-step-placeholder { display:block; margin-top:4px; color:var(--orange); font-size:10px; }
     .proc-sub-tab { border:0; background:transparent; padding:10px 12px 12px; cursor:pointer; color:var(--ink-600); font-weight:650; white-space:nowrap; position:relative; }
     .proc-sub-tab.active { color:var(--blue); }
     .proc-sub-tab.active::after { content:""; height:2px; position:absolute; left:10px; right:10px; bottom:-1px; background:var(--blue); }
@@ -517,6 +534,7 @@
     .op-link { border:0; background:transparent; color:var(--blue); font-weight:700; font-size:11.5px; cursor:pointer; padding:2px 0; margin-right:10px; }
     .op-link:hover { color:var(--navy); text-decoration:underline; }
     .op-link.danger { color:var(--red); }
+    .process-step-cell .op-link, .proc-field .op-link { font-size:inherit; font-weight:600; margin:0; text-align:left; white-space:normal; }
     .review-item-row { display:grid; grid-template-columns:1.3fr 1.6fr 1.6fr 32px; gap:8px; margin-bottom:8px; align-items:center; }
     .review-item-row input { height:36px; border:1px solid var(--ink-200); border-radius:8px; padding:0 10px; }
     .shape-gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:10px; margin-bottom:20px; }
@@ -1692,6 +1710,123 @@ function reqStatusBadge(s){
   return {'待评估':'gray','处理中':'blue','已解决':'green','不予处理':'orange','已关闭':'gray'}[s] || 'gray';
 }
 
+function processStepText(value){
+  return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function processStepValue(value){
+  return value == null || String(value).trim() === '' ? '待补充' : String(value).trim();
+}
+const processStepFields = [
+  ['流程编号', 'number'], ['活动名称', 'name'], ['活动内容及规则', 'detail'],
+  ['输入', 'input'], ['输出', 'output'], ['执行角色', 'role'],
+  ['IT系统', 'system'], ['是否KCP', 'kcp'], ['风险控制要素', 'risk'],
+  ['关键活动类型', 'keyType'], ['关联文件', 'files'],
+];
+function processSteps(node){
+  const canvas = getCanvas(node), byId = new Map(canvas.els.map(e => [e.id, e]));
+  const queue = canvas.els.filter(e => e.type === '流程开始');
+  const visited = new Set(), ordered = [];
+  while (queue.length) {
+    const el = queue.shift();
+    if (!el || visited.has(el.id)) continue;
+    visited.add(el.id);
+    if (el.type === '活动') ordered.push(el);
+    canvas.links.filter(link => link.from === el.id).forEach(link => queue.push(byId.get(link.to)));
+  }
+  canvas.els.filter(e => e.type === '活动' && !visited.has(e.id))
+    .sort((a, b) => a.x - b.x || a.y - b.y).forEach(e => ordered.push(e));
+  return ordered.map((el, index) => {
+    const props = el.p || {};
+    const lane = canvas.lanes[Math.floor((el.y + el.h / 2) / LANE_H)];
+    const role = lane && lane.name !== '执行角色' ? lane.name : '';
+    const detail = [props.desc && `活动内容：${props.desc}`, props.rule && `规则：${props.rule}`].filter(Boolean).join('\n');
+    const files = Array.isArray(props.files)
+      ? (props.files.length ? props.files.map(file => typeof file === 'string' ? file : file.name).filter(Boolean).join('、') : '暂无关联文件')
+      : props.files;
+    return {
+      id: el.id,
+      number: processStepValue(props.code || String(index + 1).padStart(2, '0')),
+      name: processStepValue(el.label),
+      detail: processStepValue(detail),
+      input: processStepValue(props.input),
+      output: processStepValue(props.output),
+      role: processStepValue(props.role || role),
+      system: processStepValue(props.app || props.system),
+      kcp: props.keyType === 'KCP' ? '是' : (props.keyType ? '否' : '待补充'),
+      risk: processStepValue(props.risk),
+      keyType: processStepValue(props.keyType),
+      files: processStepValue(files),
+      placeholder: el.label === '核心处理活动' && !props.desc,
+    };
+  });
+}
+function processStepTargets(node, step, key){
+  if (key !== 'system' && key !== 'files') return [];
+  const value = step[key];
+  if (!value || value === '待补充' || value === '暂无关联文件') return [];
+  const systems = key === 'system' ? getCanvas(node).els.filter(el => el.type === '信息系统' && (el.p || {}).app) : [];
+  return String(value).split(/[；;、]/).map(text => {
+    const name = text.trim();
+    if (key === 'system') {
+      const target = systems.find(el => name === el.p.app || name.startsWith(`${el.p.app}（`));
+      return {name, targetId: target ? target.id : ''};
+    }
+    const file = (node.files || []).find(item => item.name === name);
+    return {name, permitted: !file || !file.noPerm};
+  }).filter(item => item.name);
+}
+function renderProcessStepValue(node, step, key){
+  if (key !== 'system' && key !== 'files') return processStepText(step[key]);
+  const targets = processStepTargets(node, step, key);
+  if (!targets.length) return processStepText(step[key]);
+  const nodeId = encodeURIComponent(node.id).replace(/'/g, '%27');
+  const stepId = encodeURIComponent(step.id).replace(/'/g, '%27');
+  return targets.map((item, index) => {
+    if (key === 'system' && !item.targetId) return processStepText(item.name);
+    const action = key === 'system' ? 'openProcessStepSystem' : 'openProcessStepFile';
+    return `<button type="button" class="op-link" onclick="${action}('${nodeId}','${stepId}',${index})">${processStepText(item.name)}</button>`;
+  }).join('；');
+}
+function openProcessStepSystem(encodedNodeId, encodedStepId, index){
+  const node = findNode(decodeURIComponent(encodedNodeId));
+  if (!node) return;
+  const step = processSteps(node).find(item => item.id === decodeURIComponent(encodedStepId));
+  if (!step) return;
+  const target = processStepTargets(node, step, 'system')[index];
+  if (target && target.targetId) openActNodeProps(node.id, target.targetId);
+}
+function openProcessStepFile(encodedNodeId, encodedStepId, index){
+  const node = findNode(decodeURIComponent(encodedNodeId));
+  if (!node) return;
+  const step = processSteps(node).find(item => item.id === decodeURIComponent(encodedStepId));
+  if (!step) return;
+  const target = processStepTargets(node, step, 'files')[index];
+  if (target) viewKnowledgeFile(encodeURIComponent(target.name), target.permitted ? 1 : 0);
+}
+function renderProcessStepList(node){
+  const steps = processSteps(node);
+  if (!steps.length) return '<p class="proc-empty-note">当前流程图尚无活动步骤。</p>';
+  const rows = steps.map(step => `<tr>
+    ${processStepFields.map(([label, key]) => `<td><span class="process-step-cell">${renderProcessStepValue(node, step, key)}</span>${key === 'name' && step.placeholder ? '<span class="process-step-placeholder">流程图占位节点</span>' : ''}</td>`).join('')}
+    <td><button class="op-link" onclick="openProcessStepDetail('${node.id}','${step.id}')">查看</button></td>
+  </tr>`).join('');
+  return `<p class="proc-empty-note">${node.flagship ? '以下为根据当前流程图补全的原型演示内容，以正式流程文件为准。' : '未配置的属性显示“待补充”。'}按流程图的连接顺序列出 ${steps.length} 个活动步骤。</p>
+    <div class="proc-table-wrap process-step-wrap"><table class="data-table process-step-table"><thead><tr>
+      ${processStepFields.map(([label]) => `<th>${label}</th>`).join('')}<th>操作</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function openProcessStepDetail(nodeId, stepId){
+  const node = findNode(nodeId);
+  if (!node) return;
+  const step = processSteps(node).find(item => item.id === stepId);
+  if (!step) return;
+  const note = step.placeholder ? '<p class="proc-empty-note">该步骤是流程图中的占位节点，具体内容待补充。</p>'
+    : (node.flagship ? '<p class="proc-empty-note">以下为原型演示内容，以正式流程文件为准。</p>' : '');
+  const body = `${note}<div class="proc-field-grid full">${processStepFields.map(([label, key]) => fieldBlock(label, renderProcessStepValue(node, step, key))).join('')}</div>`;
+  openSidePanel(`${node.name} · ${step.number} ${step.name}`, body,
+    '<button class="outline-btn" onclick="closeSidePanel()">关闭</button>', true);
+}
+
 function renderArchDetail(){
   const node = procState.archSelectedId ? findNode(procState.archSelectedId) : null;
   const host = document.querySelector('#archDetail');
@@ -1703,7 +1838,7 @@ function renderArchDetail(){
     return;
   }
   const isArch = node.type === 'arch';
-  const tabs = isArch ? ['架构图','架构卡','关联文件','需求反馈'] : ['流程图','流程文件','关联文件','需求反馈'];
+  const tabs = isArch ? ['架构图','架构卡','关联文件','需求反馈'] : ['流程图','流程概述','流程文件','关联文件','需求反馈'];
   if (!tabs.includes(procState.archTab)) procState.archTab = tabs[0];
 
   let body = '';
@@ -1720,7 +1855,7 @@ function renderArchDetail(){
       ${fieldBlock('客户', c.customer)}${fieldBlock('供应商', c.supplier)}
     </div>
     <h4 style="margin:6px 0 8px;font-size:13px">流程 KPI</h4>${kpiTable(c.kpi)}`;
-  } else if (procState.archTab === '流程文件') {
+  } else if (procState.archTab === '流程概述') {
     const f = node.fileDoc;
     body = `<div class="proc-field-grid">
       ${fieldBlock('概述', f.overview)}${fieldBlock('流程目的', f.purpose)}
@@ -1733,6 +1868,8 @@ function renderArchDetail(){
       ${fieldBlock('流程管理者', f.duty.manager)}${fieldBlock('流程责任人', f.duty.owner)}
       ${fieldBlock('流程助理', f.duty.assistant)}${fieldBlock('流程责任部门', f.duty.dept)}
     </div>`;
+  } else if (procState.archTab === '流程文件') {
+    body = renderProcessStepList(node);
   } else if (procState.archTab === '关联文件') {
     body = filesTable(node.files);
   } else if (procState.archTab === '需求反馈') {
@@ -2069,7 +2206,7 @@ function shapePreview(d){ const s = defSize(d); return `<svg viewBox="-2 -2 ${s.
 function appNameList(){ return applications.map(a => a.name); }
 function attrFieldsFor(attr){
   const F = {
-    Activity: [{k:'code',l:'编号'},{k:'label',l:'名称'},{k:'desc',l:'活动说明',t:'textarea'},{k:'keyType',l:'关键活动类型',t:'select',o:['','KCP','KSF','PA']},{k:'input',l:'输入说明'},{k:'output',l:'输出说明'},{k:'hours',l:'处理时间（H）',t:'number'}],
+    Activity: [{k:'code',l:'编号'},{k:'label',l:'名称'},{k:'desc',l:'活动说明',t:'textarea'},{k:'keyType',l:'关键活动类型',t:'select',o:['','普通活动','KCP','KSF','PA']},{k:'input',l:'输入说明'},{k:'output',l:'输出说明'},{k:'hours',l:'处理时间（H）',t:'number'}],
     Role: [{k:'label',l:'名称'},{k:'post',l:'关联岗位'},{k:'duty',l:'角色职责',t:'textarea'},{k:'main',l:'主责岗位',t:'select',o:['否','是']}],
     System: [{k:'label',l:'名称'},{k:'app',l:'关联应用（应用中心）',t:'select',o:[''].concat(appNameList()),req:1},{k:'route',l:'目标路由参数'},{k:'jump',l:'跳转说明',t:'textarea'}],
     WenDang: [{k:'label',l:'文件名称'},{k:'ver',l:'版本号'}],
@@ -2094,12 +2231,54 @@ function buildDefaultCanvas(node){
   if (node.flagship) {
     m.lanes = [{id:'l1',name:'产品线负责人'},{id:'l2',name:'产品经理'},{id:'l3',name:'产品委员会'}];
     const s = mkEl(m,'流程开始',159,37,'产品开发立项');
-    const a1 = mkEl(m,'活动',140,133,'产品需求分析',{code:'01',desc:'收集并分析产品需求',hours:'16'});
-    const a2 = mkEl(m,'活动',300,133,'产品规划设计',{code:'02',hours:'24'});
-    const r1 = mkEl(m,'活动',300,243,'规划方案审核',{code:'03',keyType:'KCP',hours:'4'});
-    const a3 = mkEl(m,'活动',460,133,'产品原型设计',{code:'04',hours:'40'});
-    const r2 = mkEl(m,'活动',460,243,'产品原型审核',{code:'05',keyType:'KCP',hours:'4'});
-    const a4 = mkEl(m,'活动',620,133,'产品设计方案发布',{code:'06',hours:'8'});
+    const a1 = mkEl(m,'活动',140,133,'产品需求分析',{
+      code:'01', desc:'收集并分析市场、客户和销售反馈，明确产品需求与验收目标。',
+      rule:'需求须记录来源、业务价值和验收标准；重复或冲突的需求先确认再纳入清单。',
+      input:'产品开发立项资料；市场与客户需求；销售反馈', output:'产品需求清单；需求分析结论',
+      keyType:'普通活动', hours:'16', system:'产品生命周期管理 PLM',
+      risk:'核对需求来源与验收标准，防止遗漏关键需求或重复立项。',
+      files:'管理产品设计_操作说明.docx'
+    });
+    const a2 = mkEl(m,'活动',300,133,'产品规划设计',{
+      code:'02', desc:'依据已确认的需求制定功能范围、版本计划与资源安排。',
+      rule:'规划方案需说明优先级、里程碑和主要风险，提交审核前由产品经理完成自检。',
+      input:'产品需求清单；需求分析结论；产品线规划', output:'产品规划方案；版本计划',
+      keyType:'普通活动', hours:'24', system:'产品生命周期管理 PLM',
+      risk:'核对方案与需求清单的一致性，避免范围遗漏和资源计划失真。',
+      files:'产品开发管理办法 V3.2；管理产品设计_操作说明.docx'
+    });
+    const r1 = mkEl(m,'活动',300,243,'规划方案审核',{
+      code:'03', desc:'审查规划方案的目标、范围、资源安排和实现可行性。',
+      rule:'审核不通过则退回产品规划设计；通过后方可进入产品原型设计。',
+      input:'产品规划方案；版本计划；需求分析结论', output:'规划方案审核结论；修改意见',
+      keyType:'KCP', hours:'4', system:'产品生命周期管理 PLM',
+      risk:'关键决策与修改意见须留痕，未经审核通过不得进入下一步骤。',
+      files:'产品设计评审规范'
+    });
+    const a3 = mkEl(m,'活动',460,133,'产品原型设计',{
+      code:'04', desc:'依据审核通过的规划方案制作产品原型和交互说明。',
+      rule:'原型需覆盖关键业务场景、主要异常路径；需求变更应同步记录。',
+      input:'审核通过的产品规划方案；产品需求清单', output:'产品原型；设计说明；需求覆盖清单',
+      keyType:'普通活动', hours:'40', system:'产品生命周期管理 PLM',
+      risk:'逐项核对需求覆盖情况，关键场景缺失时不得提交原型审核。',
+      files:'管理产品设计_操作说明.docx'
+    });
+    const r2 = mkEl(m,'活动',460,243,'产品原型审核',{
+      code:'05', desc:'评审原型的需求覆盖、可用性和技术实现可行性。',
+      rule:'评审不通过则退回产品原型设计；通过后形成正式评审结论。',
+      input:'产品原型；设计说明；需求覆盖清单', output:'产品原型审核结论；问题整改清单',
+      keyType:'KCP', hours:'4', system:'产品生命周期管理 PLM',
+      risk:'关键需求、遗留问题和风险须逐项确认并记录责任人与处理结论。',
+      files:'产品设计评审规范'
+    });
+    const a4 = mkEl(m,'活动',620,133,'产品设计方案发布',{
+      code:'06', desc:'汇总通过评审的设计成果，发布受控版本并通知下游团队。',
+      rule:'仅发布完成规划与原型审核的方案；涉及新物料时在 ERP 发起物料申请。',
+      input:'通过评审的产品原型；设计说明；审核结论', output:'发布版产品设计方案；版本记录；下游交接通知',
+      keyType:'普通活动', hours:'8', system:'产品生命周期管理 PLM；金蝶云星空 ERP（涉及新物料时）',
+      risk:'发布前核对版本、审批记录和交付范围，防止未经批准的方案流转。',
+      files:'产品开发管理办法 V3.2；管理产品设计_操作说明.docx'
+    });
     const en = mkEl(m,'流程结束',639,37,'方案发布完成');
     mkEl(m,'信息系统',460,32,'PLM 系统',{app:'产品生命周期管理 PLM',route:'/plm/design/new',jump:'在 PLM 中创建产品设计任务'});
     mkEl(m,'信息系统',620,253,'ERP 物料申请',{app:'金蝶云星空 ERP',route:'/erp/material/apply',jump:'在 ERP 中发起新物料申请'});
@@ -2440,6 +2619,7 @@ function renderProcessSwimlane(node){
 }
 function openActNodeProps(nodeId, elId){
   const node = findNode(nodeId), e = getCanvas(node).els.find(x => x.id === elId); if (!e) return;
+  if (e.type === '活动') { openProcessStepDetail(nodeId, elId); return; }
   const d = defByName(e.type), fields = attrFieldsFor(d.attr);
   let body = `<div class="proc-field-grid full">${fields.map(f => fieldBlock(f.l, cvFieldVal(e, f.k))).join('')}${fieldBlock('关联文件', '暂无关联文件')}</div>`;
   let foot = `<button class="outline-btn" onclick="closeSidePanel()">关闭</button>`;
